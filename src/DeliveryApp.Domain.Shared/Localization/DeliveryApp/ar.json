@@ -1,0 +1,56 @@
+{
+  "culture": "ar",
+  "texts": {
+    "AppName": "وصيل",
+    "Menu:Home": "الصفحة الرئيسية",
+    "Menu:MobileApp": "التطبيق المحمول",
+    "Welcome": "مرحباً",
+    "LongWelcomeMessage": "مرحبا بكم في التطبيق. هذا مشروع بدء تشغيل يعتمد على إطار عمل ABP. لمزيد من المعلومات ، يرجى زيارة abp.io.",
+    
+    "Sms:VerificationCodeSent": "تم إرسال رمز التحقق بنجاح",
+    "Sms:VerificationCodeFailed": "فشل في إرسال رمز التحقق",
+    "Sms:PhoneVerified": "تم التحقق من رقم الهاتف بنجاح",
+    "Sms:InvalidCode": "رمز التحقق غير صحيح أو منتهي الصلاحية",
+    "Sms:PasswordResetSent": "تم إرسال رمز إعادة تعيين كلمة المرور بنجاح",
+    "Sms:PasswordResetFailed": "فشل في إرسال رمز إعادة تعيين كلمة المرور",
+    
+    "Auth:UserExists": "المستخدم بهذا البريد الإلكتروني موجود بالفعل",
+    "Auth:UserExistsPhone": "المستخدم بهذا رقم الهاتف موجود بالفعل",
+    "Auth:RegistrationFailed": "فشل في التسجيل",
+    "Auth:LoginFailed": "فشل في تسجيل الدخول",
+    "Auth:InvalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "Auth:EmailVerified": "تم التحقق من البريد الإلكتروني بنجاح",
+    "Auth:EmailVerificationFailed": "فشل في التحقق من البريد الإلكتروني",
+    "Auth:PhoneVerified": "تم التحقق من الهاتف بنجاح",
+    "Auth:PhoneVerificationFailed": "فشل في التحقق من الهاتف",
+    "Auth:VerificationEmailSent": "تم إرسال بريد التحقق بنجاح",
+    "Auth:PasswordReset": "تم إعادة تعيين كلمة المرور بنجاح",
+    "Auth:PasswordResetFailed": "فشل في إعادة تعيين كلمة المرور",
+    "Auth:PasswordChanged": "تم تغيير كلمة المرور بنجاح",
+    "Auth:PasswordChangeFailed": "فشل في تغيير كلمة المرور",
+    "Auth:TokenRefreshed": "تم تحديث الرمز المميز بنجاح",
+    "Auth:TokenRefreshFailed": "فشل في تحديث الرمز المميز",
+    "Auth:LogoutSuccess": "تم تسجيل الخروج بنجاح",
+    "Auth:LogoutFailed": "فشل في تسجيل الخروج",
+    "Auth:InternalError": "حدث خطأ داخلي",
+    "Auth:TokenRequestFailed": "فشل في طلب الرمز المميز",
+    "Auth:AccountPending": "الحساب في انتظار موافقة الإدارة",
+    "Auth:AccountRejected": "تم رفض الحساب: {0}",
+    "Auth:AccountNotApproved": "الحساب غير معتمد",
+    "Auth:ContactSupport": "اتصل بالدعم الفني",
+    
+    "Email:EmailSent": "تم إرسال البريد الإلكتروني بنجاح",
+    "Email:VerificationFailed": "فشل في التحقق من البريد الإلكتروني",
+    
+    "Payment:WebhookProcessingFailed": "فشل في معالجة webhook",
+    "Payment:GeocodingFailed": "فشل في تحديد الموقع الجغرافي",
+    
+    "General:UnauthorizedAccess": "المستخدم غير مصادق عليه",
+    "General:UserIdNotFound": "لم يتم العثور على معرف المستخدم في رمز المصادقة",
+    "General:InvalidToken": "رمز غير صحيح",
+    "General:InvalidOrderStatus": "حالة الطلب غير صحيحة: {0}",
+    "General:OrderExpired": "انتهت صلاحية الطلب",
+    "General:PaymentFailed": "فشل في الدفع",
+    "General:CancelledByCustomer": "تم الإلغاء من قبل العميل"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "culture": "en",
+  "texts": {
+    "AppName": "Waseel",
+    "Menu:Home": "Home",
+    "Menu:MobileApp": "Mobile App",
+    "Welcome": "Welcome",
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    
+    "Sms:VerificationCodeSent": "Verification code sent successfully",
+    "Sms:VerificationCodeFailed": "Failed to send verification code",
+    "Sms:PhoneVerified": "Phone number verified successfully",
+    "Sms:InvalidCode": "Invalid or expired verification code",
+    "Sms:PasswordResetSent": "Password reset code sent successfully",
+    "Sms:PasswordResetFailed": "Failed to send password reset code",
+    
+    "Auth:UserExists": "User with this email already exists",
+    "Auth:UserExistsPhone": "User with this phone number already exists",
+    "Auth:RegistrationFailed": "Registration failed",
+    "Auth:LoginFailed": "Login failed",
+    "Auth:InvalidCredentials": "Invalid email or password",
+    "Auth:EmailVerified": "Email verified successfully",
+    "Auth:EmailVerificationFailed": "Email verification failed",
+    "Auth:PhoneVerified": "Phone verified successfully",
+    "Auth:PhoneVerificationFailed": "Phone verification failed",
+    "Auth:VerificationEmailSent": "Verification email sent successfully",
+    "Auth:PasswordReset": "Password reset successfully",
+    "Auth:PasswordResetFailed": "Password reset failed",
+    "Auth:PasswordChanged": "Password changed successfully",
+    "Auth:PasswordChangeFailed": "Password change failed",
+    "Auth:TokenRefreshed": "Token refreshed successfully",
+    "Auth:TokenRefreshFailed": "Token refresh failed",
+    "Auth:LogoutSuccess": "User logged out successfully",
+    "Auth:LogoutFailed": "Logout failed",
+    "Auth:InternalError": "Internal error occurred",
+    "Auth:TokenRequestFailed": "Token request failed",
+    "Auth:AccountPending": "Account awaiting admin approval",
+    "Auth:AccountRejected": "Account rejected: {0}",
+    "Auth:AccountNotApproved": "Account not approved",
+    "Auth:ContactSupport": "Contact support",
+    
+    "Email:EmailSent": "Email sent successfully",
+    "Email:VerificationFailed": "Email verification failed",
+    
+    "Payment:WebhookProcessingFailed": "Webhook processing failed",
+    "Payment:GeocodingFailed": "Geocoding failed",
+    
+    "General:UnauthorizedAccess": "User is not authenticated",
+    "General:UserIdNotFound": "User ID not found in authentication token",
+    "General:InvalidToken": "Invalid token",
+    "General:InvalidOrderStatus": "Invalid order status: {0}",
+    "General:OrderExpired": "Order expired",
+    "General:PaymentFailed": "Payment failed",
+    "General:CancelledByCustomer": "Cancelled by customer"
+  }
+}

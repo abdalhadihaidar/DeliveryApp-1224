@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DeliveryApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DeliveryApp.Application.Contracts\DeliveryApp.Application.Contracts.csproj" />
+    <ProjectReference Include="..\\DeliveryApp.Application\\DeliveryApp.Application.csproj" />
+  </ItemGroup>
+
+  <!-- Include authentication controllers located in HttpApi.Host folder -->
+  <ItemGroup>
+    <Compile Include="..\DeliveryApp.HttpApi.Host\Controllers\AuthController.cs" Link="Controllers\AuthController.cs" />
+    <Compile Include="..\DeliveryApp.HttpApi.Host\Controllers\SecureAuthController.cs" Link="Controllers\SecureAuthController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Account.HttpApi" Version="9.1.1" />
+    <PackageReference Include="Volo.Abp.Identity.HttpApi" Version="9.1.1" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.HttpApi" Version="9.1.1" />
+    <PackageReference Include="Volo.Abp.TenantManagement.HttpApi" Version="9.1.1" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.HttpApi" Version="9.1.1" />
+    <PackageReference Include="Volo.Abp.SettingManagement.HttpApi" Version="9.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\Base\" />
+  </ItemGroup>
+
+</Project>

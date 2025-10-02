@@ -1,0 +1,30 @@
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 47
+Invalid column name 'UserName'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 48
+Invalid column name 'UserName'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 49
+Invalid column name 'Email'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 50
+Invalid column name 'Email'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 61
+Invalid column name 'Name'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 62
+Invalid column name 'Surname'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 67
+Invalid column name 'TenantId'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 41
+Invalid column name 'ProfileImageUrl'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 42
+Invalid column name 'ReviewStatus'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 43
+Invalid column name 'ReviewReason'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 83
+Invalid column name 'ProfileImageUrl'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 83
+Invalid column name 'ProfileImageUrl'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 84
+Invalid column name 'ReviewStatus'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 84
+Invalid column name 'ReviewStatus'.
+Msg 207, Level 16, State 1, Server DESKTOP-EBJF4BC, Line 85
+Invalid column name 'ReviewReason'.

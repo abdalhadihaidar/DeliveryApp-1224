@@ -1,0 +1,13 @@
+@using Volo.Abp.AspNetCore.Components.Web.BasicTheme.Themes.Basic
+@using Volo.Abp.AspNetCore.Components.WebAssembly.WebApp
+
+<AuthorizeRouteView RouteData="@routeData" DefaultLayout="typeof(MainLayout)">
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeRouteView>
+
+@code {
+    [Parameter]
+    public RouteData routeData { get; set; }
+}

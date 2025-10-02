@@ -1,0 +1,186 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore;
+using DeliveryApp.Domain.Entities;
+using DeliveryApp.EntityFrameworkCore;
+
+namespace DeliveryApp.EntityFrameworkCore.Repositories
+{
+    public class UserRepository : EfCoreRepository<DeliveryAppDbContext, AppUser, Guid>, IUserRepository
+    {
+        public UserRepository(IDbContextProvider<DeliveryAppDbContext> dbContextProvider)
+            : base(dbContextProvider)
+        {
+        }
+
+        public async Task<DbContext> GetDbContextAsync()
+        {
+            return (DbContext)await base.GetDbContextAsync();
+        }
+
+        public async Task<AppUser> GetByIdWithDetailsAsync(Guid userId)
+        {
+            var dbContext = await GetDbContextAsync();
+
+            return await dbContext.Set<AppUser>()
+                .Include(u => u.Addresses)
+                .Include(u => u.PaymentMethods)
+                .Include(u => u.FavoriteRestaurants)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
+        public async Task<List<Address>> GetUserAddressesAsync(Guid userId)
+        {
+            var dbContext = await GetDbContextAsync();
+
+            return await dbContext.Set<Address>()
+                .Where(a => a.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task UnsetDefaultAddressAsync(Guid userId)
+        {
+            var dbContext = await GetDbContextAsync();
+            var addresses = await dbContext.Set<Address>()
+                .Where(a => a.UserId == userId && a.IsDefault)
+                .ToListAsync();
+
+            foreach (var address in addresses)
+            {
+                address.IsDefault = false;
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task AddAddressAsync(Address address)
+        {
+            var dbContext = await GetDbContextAsync();
+            await dbContext.Set<Address>().AddAsync(address);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateAddressAsync(Address address)
+        {
+            var dbContext = await GetDbContextAsync();
+            dbContext.Set<Address>().Update(address);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteAddressAsync(Address address)
+        {
+            var dbContext = await GetDbContextAsync();
+            dbContext.Set<Address>().Remove(address);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<PaymentMethod>> GetUserPaymentMethodsAsync(Guid userId)
+        {
+            var dbContext = await GetDbContextAsync();
+
+            return await dbContext.Set<PaymentMethod>()
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task UnsetDefaultPaymentMethodAsync(Guid userId)
+        {
+            var dbContext = await GetDbContextAsync();
+            var paymentMethods = await dbContext.Set<PaymentMethod>()
+                .Where(p => p.UserId == userId && p.IsDefault)
+                .ToListAsync();
+
+            foreach (var paymentMethod in paymentMethods)
+            {
+                paymentMethod.IsDefault = false;
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task AddPaymentMethodAsync(PaymentMethod paymentMethod)
+        {
+            var dbContext = await GetDbContextAsync();
+            await dbContext.Set<PaymentMethod>().AddAsync(paymentMethod);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task datePaymentMethodAsync(PaymentMethod paymentMethod)
+        {
+            var dbContext = await GetDbContextAsync();
+            dbContext.Set<PaymentMethod>().Update(paymentMethod);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeletePaymentMethodAsync(PaymentMethod paymentMethod)
+        {
+            var dbContext = await GetDbContextAsync();
+            dbContext.Set<PaymentMethod>().Remove(paymentMethod);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<Guid>> GetUserFavoriteRestaurantsAsync(Guid userId)
+        {
+            var dbContext = await GetDbContextAsync();
+            var user = await dbContext.Set<User>()
+                .Include(u => u.FavoriteRestaurants)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            return user?.FavoriteRestaurants?.Select(r => r.Id)?.ToList() ?? new List<Guid>();
+        }
+
+        public async Task AddFavoriteRestaurantAsync(Guid userId, Guid restaurantId)
+        {
+            var dbContext = await GetDbContextAsync();
+            var user = await dbContext.Set<User>()
+                .Include(u => u.FavoriteRestaurants)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            var restaurant = await dbContext.Set<Restaurant>()
+                .FirstOrDefaultAsync(r => r.Id == restaurantId);
+
+            if (user != null && restaurant != null)
+            {
+                if (user.FavoriteRestaurants == null)
+                {
+                    user.FavoriteRestaurants = new List<Restaurant>();
+                }
+
+                user.FavoriteRestaurants.Add(restaurant);
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task RemoveFavoriteRestaurantAsync(Guid userId, Guid restaurantId)
+        {
+            var dbContext = await GetDbContextAsync();
+            var user = await dbContext.Set<User>()
+                .Include(u => u.FavoriteRestaurants)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user?.FavoriteRestaurants != null)
+            {
+                var restaurant = user.FavoriteRestaurants.FirstOrDefault(r => r.Id == restaurantId);
+                if (restaurant != null)
+                {
+                    user.FavoriteRestaurants.Remove(restaurant);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+        }
+
+        public async Task<bool> IsFavoriteRestaurantAsync(Guid userId, Guid restaurantId)
+        {
+            var dbContext = await GetDbContextAsync();
+            var user = await dbContext.Set<User>()
+                .Include(u => u.FavoriteRestaurants)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            return user?.FavoriteRestaurants?.Any(r => r.Id == restaurantId) ?? false;
+        }
+    }
+}
