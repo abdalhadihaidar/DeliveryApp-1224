@@ -314,6 +314,26 @@ namespace DeliveryApp.Application.Services
         public async Task<PagedResultDto<CancelledOrderDto>> GetCancelledOrdersAsync(int page, int pageSize, string sortBy, string sortOrder)
         {
             var queryable = await _orderRepository.GetQueryableAsync();
+            
+            // First, let's check if there are any cancelled orders at all
+            var totalCancelledCount = await queryable
+                .Where(o => o.Status == OrderStatus.Cancelled)
+                .CountAsync();
+            
+            // If no cancelled orders exist, let's provide some debugging information
+            if (totalCancelledCount == 0)
+            {
+                // Get total order count and status breakdown for debugging
+                var totalOrders = await queryable.CountAsync();
+                var statusBreakdown = await queryable
+                    .GroupBy(o => o.Status)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .ToListAsync();
+                
+                _logger.LogInformation("No cancelled orders found. Total orders: {TotalOrders}, Status breakdown: {StatusBreakdown}", 
+                    totalOrders, string.Join(", ", statusBreakdown.Select(s => $"{s.Status}={s.Count}")));
+            }
+            
             var query = queryable
                 .Include(o => o.User)
                 .Include(o => o.Restaurant)
@@ -934,6 +954,39 @@ namespace DeliveryApp.Application.Services
             {
                 _logger.LogError(ex, "Failed to get recent activities");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Helper method to create test cancelled orders for testing purposes
+        /// This method should only be used in development/testing environments
+        /// </summary>
+        public async Task<bool> CreateTestCancelledOrderAsync(Guid orderId)
+        {
+            try
+            {
+                var order = await _orderRepository.GetAsync(orderId);
+                
+                // Only allow cancelling orders that are not already delivered or cancelled
+                if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
+                {
+                    _logger.LogWarning("Cannot cancel order {OrderId} with status {Status}", orderId, order.Status);
+                    return false;
+                }
+                
+                var previousStatus = order.Status;
+                order.Status = OrderStatus.Cancelled;
+                await _orderRepository.UpdateAsync(order);
+                
+                _logger.LogInformation("Successfully created test cancelled order {OrderId} from status {PreviousStatus}", 
+                    orderId, previousStatus);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create test cancelled order {OrderId}", orderId);
+                return false;
             }
         }
     }

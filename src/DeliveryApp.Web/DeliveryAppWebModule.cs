@@ -134,7 +134,8 @@ public class DeliveryAppWebModule : AbpModule
 
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options
                 options.UseAspNetCore()
-                       .EnableTokenEndpointPassthrough()
+                       // Disabled TokenEndpointPassthrough to avoid ABP TokenController NRE
+                       // .EnableTokenEndpointPassthrough()
                        .EnableAuthorizationEndpointPassthrough()
                        .EnableUserInfoEndpointPassthrough()
                        .DisableTransportSecurityRequirement(); // Allow HTTP in development

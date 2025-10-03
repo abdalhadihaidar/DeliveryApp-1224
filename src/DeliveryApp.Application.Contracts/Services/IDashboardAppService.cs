@@ -20,6 +20,9 @@ namespace DeliveryApp.Application.Contracts.Services
         Task<PagedResultDto<StoreDto>> GetStoresAsync(int page, int pageSize, string sortBy, string sortOrder);
         Task<PreviousPeriodDataDto> GetPreviousPeriodDataAsync();
         Task<List<DashboardRecentActivityDto>> GetRecentActivitiesAsync();
+        
+        // Helper method for testing cancelled orders functionality
+        Task<bool> CreateTestCancelledOrderAsync(Guid orderId);
     }
 }
 

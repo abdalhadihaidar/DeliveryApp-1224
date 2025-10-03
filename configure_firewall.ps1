@@ -30,3 +30,5 @@ Write-Host "You can now access DeliveryApp.Web from other devices on your networ
 Write-Host "https://192.168.1.107:44356" -ForegroundColor Cyan
 Write-Host ""
 Read-Host "Press Enter to exit" 
+
+

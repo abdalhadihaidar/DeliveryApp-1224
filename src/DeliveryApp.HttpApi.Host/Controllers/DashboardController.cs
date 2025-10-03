@@ -1,4 +1,5 @@
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -82,6 +83,17 @@ namespace DeliveryApp.HttpApi.Host.Controllers
         {
             var stores = await _dashboardAppService.GetStoresAsync(page, pageSize, sortBy, sortOrder);
             return Ok(stores);
+        }
+
+        /// <summary>
+        /// Create a test cancelled order for testing purposes
+        /// This endpoint should only be used in development/testing environments
+        /// </summary>
+        [HttpPost("test-cancelled-order/{orderId}")]
+        public async Task<ActionResult<bool>> CreateTestCancelledOrder(Guid orderId)
+        {
+            var result = await _dashboardAppService.CreateTestCancelledOrderAsync(orderId);
+            return Ok(result);
         }
     }
 }

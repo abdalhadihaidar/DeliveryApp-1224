@@ -33,6 +33,7 @@ using Microsoft.AspNetCore.Identity;
 using OpenIddict.Abstractions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using OpenIddict.Server;
+using static OpenIddict.Server.OpenIddictServerEvents;
 using Volo.Abp.Authorization;
 using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.MultiTenancy;
@@ -94,6 +95,12 @@ public class DeliveryAppHttpApiHostModule : AbpModule
                 options.AllowPasswordFlow()
                        .AllowRefreshTokenFlow();
 
+                // Add custom password flow handler to bypass ABP TokenController issues
+                options.AddEventHandler<HandleTokenRequestContext>(builder =>
+                {
+                    builder.UseSingletonHandler<DeliveryApp.HttpApi.Host.Handlers.PasswordFlowHandler>();
+                });
+
                 // Set the issuer
                 var issuer = configuration["JwtSettings:Issuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "http://wasel.somee.com/";
                 options.SetIssuer(issuer);
@@ -121,7 +128,8 @@ public class DeliveryAppHttpApiHostModule : AbpModule
 
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options
                 options.UseAspNetCore()
-                       .EnableTokenEndpointPassthrough()
+                       // Disabled to avoid ABP TokenController ServiceScopeFactory NRE
+                       // .EnableTokenEndpointPassthrough()
                        .EnableAuthorizationEndpointPassthrough()
                        .EnableUserInfoEndpointPassthrough()
                        .DisableTransportSecurityRequirement(); // For HTTP in development
@@ -339,30 +347,12 @@ public class DeliveryAppHttpApiHostModule : AbpModule
 
     private void ConfigureAutoApiControllers()
     {
+        // Remove OpenIddict default TokenController to avoid route conflicts with custom TokenController
         Configure<AbpAspNetCoreMvcOptions>(options =>
         {
-            // Only create conventional controllers from the HttpApi.Host assembly
-            // to avoid conflicts with other modules
             options.ConventionalControllers.Create(typeof(DeliveryAppHttpApiHostModule).Assembly);
-            
-            // Create conventional controllers from Application module but exclude services
-            // that have manual controllers or are handled elsewhere
-            options.ConventionalControllers.Create(typeof(DeliveryAppApplicationModule).Assembly, opts =>
-            {
-                opts.TypePredicate = type => 
-                    type != typeof(DeliveryApp.Application.Services.RestaurantOwnerAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.DashboardAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.UserAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.CustomerAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.DeliveryPersonAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.AuthService) &&
-                    type != typeof(DeliveryApp.Application.Services.RestaurantCategoryAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.MealCategoryAppService) &&
-                    type != typeof(DeliveryApp.Application.Services.StripePaymentService) &&
-                    type != typeof(DeliveryApp.Application.Services.FinancialManagementService) &&
-                    type != typeof(DeliveryApp.Application.Services.AdvertisementAppService);
-            });
         });
+
     }
 
     private void ConfigureSwaggerServices(IServiceCollection services)

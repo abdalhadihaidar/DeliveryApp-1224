@@ -55,10 +55,8 @@ namespace DeliveryApp.Application.Services
                         fromDate, 
                         toDate);
                     
-                    if (performance != null)
-                    {
-                        performanceData.Add(performance);
-                    }
+                    // Always add performance data, even if it's zero performance
+                    performanceData.Add(performance);
                 }
 
                 return performanceData.OrderByDescending(p => p.Rating).ToArray();
@@ -282,10 +280,8 @@ namespace DeliveryApp.Application.Services
                                o.OrderDate <= toDate)
                     .ToListAsync();
 
-                if (!deliveryOrders.Any())
-                {
-                    return null; // No orders in this period
-                }
+                // Even if no orders in this period, we should still show the delivery person
+                // with zero performance metrics rather than hiding them completely
 
                 var completedOrders = deliveryOrders.Where(o => o.Status == OrderStatus.Delivered).ToList();
 
