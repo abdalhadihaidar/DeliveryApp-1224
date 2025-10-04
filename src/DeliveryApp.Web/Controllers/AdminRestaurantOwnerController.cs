@@ -10,6 +10,8 @@ using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.Application.Dtos;
 using System.Linq;
 using DeliveryApp.Application.Contracts.Services;
+using DeliveryApp.Domain.Repositories;
+using Volo.Abp.Identity;
 
 namespace DeliveryApp.Web.Controllers
 {
@@ -21,15 +23,25 @@ namespace DeliveryApp.Web.Controllers
         private readonly IUserAppService _userAppService;
         private readonly IRestaurantAppService _restaurantAppService;
         private readonly IRestaurantOwnerAppService _restaurantOwnerAppService;
+        private readonly IUserRepository _userRepository;
+        private readonly IdentityUserManager _userManager;
+        private readonly IRealtimeNotifier _realtimeNotifier;
 
         public AdminRestaurantOwnerController(
             IUserAppService userAppService,
             IRestaurantAppService restaurantAppService,
-            IRestaurantOwnerAppService restaurantOwnerAppService)
+            IRestaurantOwnerAppService restaurantOwnerAppService,
+            IUserRepository userRepository,
+            IdentityUserManager userManager,
+            IRealtimeNotifier realtimeNotifier)
         {
             _userAppService = userAppService;
             _restaurantAppService = restaurantAppService;
             _restaurantOwnerAppService = restaurantOwnerAppService;
+            _userRepository = userRepository;
+            _userManager = userManager;
+            _realtimeNotifier = realtimeNotifier;
+            // removed userManager
         }
 
         /// <summary>
@@ -51,7 +63,14 @@ namespace DeliveryApp.Web.Controllers
             };
 
             // Get all users with restaurant_owner role
-            var users = await _userAppService.GetListAsync(input);
+            // Force fresh data by using a new input to avoid caching issues
+            var freshInput = new Application.Contracts.Dtos.PagedAndSortedResultRequestDto
+            {
+                SkipCount = skipCount,
+                MaxResultCount = maxResultCount,
+                Sorting = sorting
+            };
+            var users = await _userAppService.GetListAsync(freshInput);
             
             // Filter for restaurant owners
             var restaurantOwners = new List<RestaurantOwnerAdminDto>();
@@ -193,15 +212,61 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = string.IsNullOrWhiteSpace(user.Name) ? (string.IsNullOrWhiteSpace(user.Email) ? user.UserName ?? "Restaurant Owner" : user.Email!) : user.Name!,
                 IsActive = true,
                 EmailConfirmed = true,
-                PhoneNumberConfirmed = true
+                PhoneNumberConfirmed = true,
+                IsAdminApproved = true,
+                ReviewReason = input.Reason, // Store the approval reason
+                ReviewStatus = "Approved" // Set review status to approved
             };
 
             await _userAppService.UpdateAsync(Guid.Parse(id), updateInput);
 
-            // Return updated owner details
-            return await GetRestaurantOwnerDetails(id);
+            // Send notification if requested
+            if (input.SendNotification)
+            {
+                await _realtimeNotifier.NotifyUserApprovedAsync(Guid.Parse(id));
+            }
+
+            // Get fresh user data after update
+            var updatedUser = await _userAppService.GetAsync(Guid.Parse(id));
+            
+            // Get restaurants managed by this owner
+            var restaurants = await _restaurantAppService.GetRestaurantsByOwnerAsync(updatedUser.Id.ToString());
+            
+            // Calculate statistics
+            var totalOrders = 0;
+            var totalRevenue = 0.0m;
+            var lastLogin = updatedUser.LastLoginTime;
+            
+            foreach (var restaurant in restaurants)
+            {
+                var stats = await _restaurantAppService.GetRestaurantStatisticsAsync(restaurant.Id);
+                totalOrders += stats.TotalOrders;
+                totalRevenue += (decimal)stats.TotalRevenue;
+            }
+
+            return new RestaurantOwnerAdminDto
+            {
+                Id = updatedUser.Id.ToString(),
+                Name = updatedUser.Name ?? "N/A",
+                Email = updatedUser.Email,
+                PhoneNumber = updatedUser.PhoneNumber,
+                CreationTime = updatedUser.CreationTime,
+                LastLoginTime = lastLogin,
+                IsActive = updatedUser.IsActive,
+                EmailConfirmed = updatedUser.EmailConfirmed,
+                PhoneNumberConfirmed = updatedUser.PhoneNumberConfirmed,
+                UserType = updatedUser.UserType,
+                ManagedRestaurants = restaurants.Count(),
+                TotalOrders = totalOrders,
+                TotalRevenue = totalRevenue,
+                Status = DetermineOwnerStatus(updatedUser),
+                VerificationStatus = DetermineVerificationStatus(updatedUser),
+                ProfileComplete = IsProfileComplete(updatedUser),
+                Restaurants = restaurants
+            };
         }
 
         /// <summary>
@@ -217,17 +282,66 @@ namespace DeliveryApp.Web.Controllers
                 throw new UserFriendlyException("User is not a restaurant owner");
             }
 
-            // Deactivate the user
+            // Reject the user (set IsAdminApproved to false, deactivate, and store rejection reason)
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
-                IsActive = false
+                Name = string.IsNullOrWhiteSpace(user.Name) ? (string.IsNullOrWhiteSpace(user.Email) ? user.UserName ?? "Restaurant Owner" : user.Email!) : user.Name!,
+                IsActive = false,
+                IsAdminApproved = false,
+                ReviewReason = input.Reason, // Store the rejection reason
+                ReviewStatus = "Rejected" // Set review status to rejected
             };
 
             await _userAppService.UpdateAsync(Guid.Parse(id), updateInput);
 
-            // Return updated owner details
-            return await GetRestaurantOwnerDetails(id);
+            // Send notification if requested
+            if (input.SendNotification)
+            {
+                await _realtimeNotifier.NotifyUserRejectedAsync(Guid.Parse(id), input.Reason);
+            }
+
+            // Small delay to ensure database transaction is committed
+            await Task.Delay(100);
+
+            // Get fresh user data after update
+            var updatedUser = await _userAppService.GetAsync(Guid.Parse(id));
+            
+            // Get restaurants managed by this owner
+            var restaurants = await _restaurantAppService.GetRestaurantsByOwnerAsync(updatedUser.Id.ToString());
+            
+            // Calculate statistics
+            var totalOrders = 0;
+            var totalRevenue = 0.0m;
+            var lastLogin = updatedUser.LastLoginTime;
+            
+            foreach (var restaurant in restaurants)
+            {
+                var stats = await _restaurantAppService.GetRestaurantStatisticsAsync(restaurant.Id);
+                totalOrders += stats.TotalOrders;
+                totalRevenue += (decimal)stats.TotalRevenue;
+            }
+
+            return new RestaurantOwnerAdminDto
+            {
+                Id = updatedUser.Id.ToString(),
+                Name = updatedUser.Name ?? "N/A",
+                Email = updatedUser.Email,
+                PhoneNumber = updatedUser.PhoneNumber,
+                CreationTime = updatedUser.CreationTime,
+                LastLoginTime = lastLogin,
+                IsActive = updatedUser.IsActive,
+                EmailConfirmed = updatedUser.EmailConfirmed,
+                PhoneNumberConfirmed = updatedUser.PhoneNumberConfirmed,
+                UserType = updatedUser.UserType,
+                ManagedRestaurants = restaurants.Count(),
+                TotalOrders = totalOrders,
+                TotalRevenue = totalRevenue,
+                Status = DetermineOwnerStatus(updatedUser),
+                VerificationStatus = DetermineVerificationStatus(updatedUser),
+                ProfileComplete = IsProfileComplete(updatedUser),
+                Restaurants = restaurants
+            };
         }
 
         /// <summary>
@@ -246,6 +360,7 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = string.IsNullOrWhiteSpace(user.Name) ? (string.IsNullOrWhiteSpace(user.Email) ? user.UserName ?? "Restaurant Owner" : user.Email!) : user.Name!,
                 IsActive = true
             };
 
@@ -270,6 +385,7 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = string.IsNullOrWhiteSpace(user.Name) ? (string.IsNullOrWhiteSpace(user.Email) ? user.UserName ?? "Restaurant Owner" : user.Email!) : user.Name!,
                 IsActive = false
             };
 
@@ -297,8 +413,8 @@ namespace DeliveryApp.Web.Controllers
             var statistics = new AdminRestaurantOwnerStatisticsDto
             {
                 TotalOwners = restaurantOwners.Count,
-                ActiveOwners = restaurantOwners.Count(u => u.IsActive && u.EmailConfirmed && u.PhoneNumberConfirmed),
-                PendingApprovals = restaurantOwners.Count(u => !u.EmailConfirmed || !u.PhoneNumberConfirmed),
+                ActiveOwners = restaurantOwners.Count(u => u.IsActive && u.IsAdminApproved && u.EmailConfirmed && u.PhoneNumberConfirmed),
+                PendingApprovals = restaurantOwners.Count(u => !u.IsAdminApproved || !u.EmailConfirmed || !u.PhoneNumberConfirmed),
                 InactiveOwners = restaurantOwners.Count(u => !u.IsActive),
                 TotalRestaurants = 0,
                 TotalRevenue = 0.0m,
@@ -357,15 +473,15 @@ namespace DeliveryApp.Web.Controllers
         private string DetermineOwnerStatus(UserDto user)
         {
             if (!user.IsActive) return "inactive";
-            if (user.EmailConfirmed && user.PhoneNumberConfirmed) return "active";
-            if (!user.EmailConfirmed || !user.PhoneNumberConfirmed) return "pending";
+            if (user.IsAdminApproved && user.EmailConfirmed && user.PhoneNumberConfirmed) return "active";
+            if (!user.IsAdminApproved || !user.EmailConfirmed || !user.PhoneNumberConfirmed) return "pending";
             return "pending";
         }
 
         private string DetermineVerificationStatus(UserDto user)
         {
-            if (user.EmailConfirmed && user.PhoneNumberConfirmed) return "verified";
-            if (!user.EmailConfirmed || !user.PhoneNumberConfirmed) return "pending";
+            if (user.IsAdminApproved && user.EmailConfirmed && user.PhoneNumberConfirmed) return "verified";
+            if (!user.IsAdminApproved || !user.EmailConfirmed || !user.PhoneNumberConfirmed) return "pending";
             return "pending";
         }
 

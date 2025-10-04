@@ -75,7 +75,11 @@ namespace DeliveryApp.Application.Contracts.Dtos
         public decimal Amount { get; set; }
         public string DeliveryTimeDifference { get; set; }
         public string CustomerStatus { get; set; }
-        public OrderStatus OrderStatus { get; set; }
+        public string OrderStatus { get; set; }
+        public int? EstimatedDeliveryTime { get; set; }
+        public string? DeliveryPersonId { get; set; }
+        public string? DeliveryPersonName { get; set; }
+        public string? ActualDeliveryTime { get; set; }
     }
 
     // DTO for Customers

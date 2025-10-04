@@ -207,6 +207,20 @@ namespace DeliveryApp.HttpApi.Host.Controllers
             return await _userAppService.RejectUserAsync(id, reason);
         }
 
+        [HttpPost("{id}/activate")]
+        [Authorize(Roles = "admin,manager")]
+        public async Task<UserDto> ActivateUserAsync(Guid id, [FromBody] string reason)
+        {
+            return await _userAppService.AcceptUserAsync(id, reason);
+        }
+
+        [HttpPost("{id}/deactivate")]
+        [Authorize(Roles = "admin,manager")]
+        public async Task<UserDto> DeactivateUserAsync(Guid id, [FromBody] string reason)
+        {
+            return await _userAppService.RejectUserAsync(id, reason);
+        }
+
         [HttpGet("debug/admin-check")]
         [AllowAnonymous]
         public async Task<IActionResult> DebugAdminCheck()

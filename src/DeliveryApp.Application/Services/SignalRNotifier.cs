@@ -40,6 +40,26 @@ namespace DeliveryApp.Application.Services
             }
         }
 
+        public async Task NotifyUserRejectedAsync(Guid userId, string reason)
+        {
+            try
+            {
+                await _hubContext.Clients.User(userId.ToString()).SendAsync("UserRejected", new
+                {
+                    userId = userId,
+                    message = "Your account has been rejected by admin",
+                    reason = reason,
+                    timestamp = DateTime.UtcNow
+                });
+                
+                _logger.LogInformation($"SignalR notification sent for user rejection: {userId}, reason: {reason}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to send SignalR notification for user rejection: {userId}");
+            }
+        }
+
         public async Task NotifyOrderStatusChangedAsync(Guid orderId, string status)
         {
             try

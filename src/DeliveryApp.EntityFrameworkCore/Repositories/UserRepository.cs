@@ -23,6 +23,24 @@ namespace DeliveryApp.EntityFrameworkCore.Repositories
             return await base.GetDbContextAsync();
         }
 
+        public new async Task<AppUser> GetAsync(Guid id, bool includeDetails = false)
+        {
+            var dbContext = await GetDbContextAsync();
+            return await dbContext.Set<AppUser>()
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public new async Task<AppUser> UpdateAsync(AppUser entity, bool autoSave = false)
+        {
+            var dbContext = await GetDbContextAsync();
+            dbContext.Set<AppUser>().Update(entity);
+            if (autoSave)
+            {
+                await dbContext.SaveChangesAsync();
+            }
+            return entity;
+        }
+
         public async Task<AppUser> GetByIdWithDetailsAsync(Guid userId)
         {
             var dbContext = await GetDbContextAsync();
@@ -174,25 +192,27 @@ namespace DeliveryApp.EntityFrameworkCore.Repositories
         {
             var dbContext = await GetDbContextAsync();
             
-            // Query AbpUsers (non-deleted users) and left join with AppUsers to get additional fields
-            var query = from abpUser in dbContext.Set<IdentityUser>().Where(u => !u.IsDeleted)
-                        join appUser in dbContext.Set<AppUser>() on abpUser.Id equals appUser.Id into appUserGroup
-                        from appUser in appUserGroup.DefaultIfEmpty()
-                        select new
+            // Since AppUser inherits from IdentityUser and uses the same table (AbpUsers),
+            // we can query directly from the AppUser DbSet
+            var query = dbContext.Set<AppUser>().Where(u => !u.IsDeleted).AsNoTracking()
+                        .Select(u => new
                         {
-                            Id = abpUser.Id,
-                            UserName = abpUser.UserName,
-                            Email = abpUser.Email,
-                            Name = abpUser.Name,
-                            PhoneNumber = abpUser.PhoneNumber,
-                            IsActive = abpUser.IsActive,
-                            IsDeleted = abpUser.IsDeleted,
-                            CreationTime = abpUser.CreationTime,
-                            LastModificationTime = abpUser.LastModificationTime,
-                            ProfileImageUrl = appUser != null ? appUser.ProfileImageUrl : string.Empty,
-                            ReviewStatus = appUser != null ? appUser.ReviewStatus.ToString() : null,
-                            ReviewReason = appUser != null ? appUser.ReviewReason : null
-                        };
+                            Id = u.Id,
+                            UserName = u.UserName,
+                            Email = u.Email,
+                            Name = u.Name,
+                            PhoneNumber = u.PhoneNumber,
+                            IsActive = u.IsActive,
+                            IsDeleted = u.IsDeleted,
+                            CreationTime = u.CreationTime,
+                            LastModificationTime = u.LastModificationTime,
+                            EmailConfirmed = u.EmailConfirmed,
+                            PhoneNumberConfirmed = u.PhoneNumberConfirmed,
+                            ProfileImageUrl = u.ProfileImageUrl,
+                            ReviewStatus = u.ReviewStatus.ToString(),
+                            ReviewReason = u.ReviewReason,
+                            IsAdminApproved = u.IsAdminApproved
+                        });
             
             // Apply sorting
             if (!string.IsNullOrEmpty(sorting))
@@ -224,8 +244,30 @@ namespace DeliveryApp.EntityFrameworkCore.Repositories
                     Name = result.Name,
                     ProfileImageUrl = result.ProfileImageUrl,
                     ReviewStatus = Enum.TryParse<DeliveryApp.Domain.Enums.ReviewStatus>(result.ReviewStatus, true, out var reviewStatus) ? reviewStatus : DeliveryApp.Domain.Enums.ReviewStatus.Pending,
-                    ReviewReason = result.ReviewReason
+                    ReviewReason = result.ReviewReason,
+                    IsAdminApproved = result.IsAdminApproved
                 };
+                
+                // Set IsActive using reflection since it's inherited from IdentityUser
+                var isActiveProperty = typeof(AppUser).GetProperty("IsActive");
+                if (isActiveProperty != null)
+                {
+                    isActiveProperty.SetValue(appUser, result.IsActive);
+                }
+                
+                // Set EmailConfirmed using reflection since it's inherited from IdentityUser
+                var emailConfirmedProperty = typeof(AppUser).GetProperty("EmailConfirmed");
+                if (emailConfirmedProperty != null)
+                {
+                    emailConfirmedProperty.SetValue(appUser, result.EmailConfirmed);
+                }
+                
+                // Set PhoneNumberConfirmed using reflection since it's inherited from IdentityUser
+                var phoneNumberConfirmedProperty = typeof(AppUser).GetProperty("PhoneNumberConfirmed");
+                if (phoneNumberConfirmedProperty != null)
+                {
+                    phoneNumberConfirmedProperty.SetValue(appUser, result.PhoneNumberConfirmed);
+                }
                 
                 // Set phone number using reflection since it has a private setter
                 var phoneNumberProperty = typeof(AppUser).GetProperty("PhoneNumber");

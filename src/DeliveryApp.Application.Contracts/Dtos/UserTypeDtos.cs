@@ -22,6 +22,7 @@ namespace DeliveryApp.Application.Contracts.Dtos
         public DateTime? LastLoginTime { get; set; } // <-- Added for last login time
         public bool EmailConfirmed { get; set; } // <-- Added for email confirmation
         public bool PhoneNumberConfirmed { get; set; } // <-- Added for phone confirmation
+        public bool IsAdminApproved { get; set; } // <-- Added for admin approval status
         public string? UserType { get; set; } // <-- Added for user type (string representation for compatibility)
     }
 

@@ -10,6 +10,7 @@ using Volo.Abp.Identity;
 using DeliveryApp.Application.Contracts.Dtos;
 using DeliveryApp.Application.Contracts.Services;
 using Volo.Abp.AspNetCore.Mvc;
+using System.IO;
 
 namespace DeliveryApp.Web.Controllers
 {
@@ -239,6 +240,82 @@ namespace DeliveryApp.Web.Controllers
         public async Task<List<string>> GetRolesAsync()
         {
             return await _userAppService.GetAllRolesAsync();
+        }
+
+        [HttpPost("{id}/deactivate")]
+        [Authorize(Roles = "admin,manager")]
+        public async Task<UserDto> DeactivateUserAsync(Guid id)
+        {
+            // Read the request body manually to handle text/plain content type
+            string reason;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                reason = await reader.ReadToEndAsync();
+            }
+            
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                reason = "Deactivated by admin";
+            }
+            
+            return await _userAppService.RejectUserAsync(id, reason);
+        }
+
+        [HttpPost("{id}/activate")]
+        [Authorize(Roles = "admin,manager")]
+        public async Task<UserDto> ActivateUserAsync(Guid id)
+        {
+            // Read the request body manually to handle text/plain content type
+            string reason;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                reason = await reader.ReadToEndAsync();
+            }
+            
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                reason = "Activated by admin";
+            }
+            
+            return await _userAppService.AcceptUserAsync(id, reason);
+        }
+
+        [HttpPost("{id}/accept")]
+        [Authorize(Roles = "admin,manager")]
+        public async Task<UserDto> AcceptUserAsync(Guid id)
+        {
+            // Read the request body manually to handle text/plain content type
+            string reason;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                reason = await reader.ReadToEndAsync();
+            }
+            
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                reason = "Accepted by admin";
+            }
+            
+            return await _userAppService.AcceptUserAsync(id, reason);
+        }
+
+        [HttpPost("{id}/reject")]
+        [Authorize(Roles = "admin,manager")]
+        public async Task<UserDto> RejectUserAsync(Guid id)
+        {
+            // Read the request body manually to handle text/plain content type
+            string reason;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                reason = await reader.ReadToEndAsync();
+            }
+            
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                reason = "Rejected by admin";
+            }
+            
+            return await _userAppService.RejectUserAsync(id, reason);
         }
     }
 }

@@ -58,7 +58,7 @@ namespace DeliveryApp.Web.Controllers
                     await file.CopyToAsync(stream);
                 }
 
-                var fileUrl = $"/uploads/images/{fileName}";
+                var fileUrl = $"/api/app/file-upload/image/{fileName}";
                 
                 return Ok(new
                 {
@@ -90,6 +90,13 @@ namespace DeliveryApp.Web.Controllers
 
         [HttpPost("menu-item-image")]
         public async Task<IActionResult> UploadMenuItemImage(IFormFile file)
+        {
+            return await UploadImage(file);
+        }
+
+        [HttpPost("profile-image")]
+        [Authorize] // Allow any authenticated user to upload profile images
+        public async Task<IActionResult> UploadProfileImage(IFormFile file)
         {
             return await UploadImage(file);
         }

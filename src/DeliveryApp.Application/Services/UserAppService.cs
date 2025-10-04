@@ -97,7 +97,25 @@ namespace DeliveryApp.Application.Services
                 user.Name = input.Name;
             
             if (!string.IsNullOrEmpty(input.ProfileImageUrl))
-                user.ProfileImageUrl = input.ProfileImageUrl;
+            {
+                // Check if it's a base64 data URL (which we don't want to store directly)
+                if (input.ProfileImageUrl.StartsWith("data:image/"))
+                {
+                    throw new Exception("Base64 image data is not supported. Please upload the image file first and provide the URL.");
+                }
+                
+                // Only store if it's a valid URL (starts with http/https or is a relative path)
+                if (input.ProfileImageUrl.StartsWith("http://") || 
+                    input.ProfileImageUrl.StartsWith("https://") || 
+                    input.ProfileImageUrl.StartsWith("/"))
+                {
+                    user.ProfileImageUrl = input.ProfileImageUrl;
+                }
+                else
+                {
+                    throw new Exception("Invalid image URL format. Please provide a valid URL.");
+                }
+            }
 
             await _userRepository.UpdateAsync(user);
 
@@ -432,8 +450,14 @@ namespace DeliveryApp.Application.Services
 
         public async Task<List<string>> GetAllRolesAsync()
         {
-            var roles = await _roleManager.Roles.ToListAsync();
-            return roles.Select(r => r.Name).ToList();
+            // Get roles from the database using the DbContext directly
+            // This bypasses the IQueryableRoleStore limitation
+            var dbContext = await _userRepository.GetDbContextAsync();
+            var roles = await dbContext.Set<Volo.Abp.Identity.IdentityRole>()
+                .Select(r => r.Name)
+                .ToListAsync();
+            
+            return roles;
         }
 
         public async Task<PagedResultDto<UserDto>> GetListAsync(PagedAndSortedResultRequestDto input)
@@ -444,7 +468,7 @@ namespace DeliveryApp.Application.Services
             
             foreach (var appUser in users)
             {
-                // Get roles from IdentityUser
+                // Get roles from IdentityUser (still need this for roles)
                 var identityUser = await _userManager.FindByIdAsync(appUser.Id.ToString());
                 var roles = identityUser != null ? (await _userManager.GetRolesAsync(identityUser)).ToList() : new List<string>();
                 var primaryRole = roles.FirstOrDefault();
@@ -459,11 +483,14 @@ namespace DeliveryApp.Application.Services
                     ProfileImageUrl = appUser.ProfileImageUrl,
                     Role = MapRoleStringToEnum(primaryRole),
                     Roles = roles,
-                    IsActive = appUser.IsActive,
+                    IsActive = appUser.IsActive,  // Now properly set from repository
                     ReviewStatus = appUser.ReviewStatus.ToString(),
                     ReviewReason = appUser.ReviewReason,
                     CreationTime = appUser.CreationTime,
-                    UserType = primaryRole
+                    UserType = primaryRole,
+                    EmailConfirmed = appUser.EmailConfirmed,  // Now properly set from repository
+                    PhoneNumberConfirmed = appUser.PhoneNumberConfirmed,  // Now properly set from repository
+                    IsAdminApproved = appUser.IsAdminApproved
                 });
             }
             return new PagedResultDto<UserDto>(totalCount, userDtos);
@@ -509,47 +536,153 @@ namespace DeliveryApp.Application.Services
 
         public async Task<UserDto> UpdateAsync(Guid id, UpdateUserDto input)
         {
+            // Validate input
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
             // Get the AppUser with additional properties
             var appUser = await _userRepository.GetAsync(id);
             if (appUser == null)
             {
-                throw new Exception("User not found");
+                throw new Exception($"User not found with ID: {id}");
             }
 
             // Get the IdentityUser for role management
             var identityUser = await _userManager.FindByIdAsync(id.ToString());
             if (identityUser == null)
             {
-                throw new Exception("Identity user not found");
+                throw new Exception($"Identity user not found with ID: {id}");
             }
 
-            // Update AppUser properties
-            appUser.Name = input.Name;
-            appUser.ProfileImageUrl = input.ProfileImageUrl ?? string.Empty;
-            await _userRepository.UpdateAsync(appUser);
+            // Update AppUser properties with null checks
+            if (!string.IsNullOrEmpty(input.Name))
+            {
+                appUser.Name = input.Name;
+            }
 
-            // Update IdentityUser properties
+            // Handle ProfileImageUrl - validate and store only if it's a valid URL (not base64)
+            if (!string.IsNullOrEmpty(input.ProfileImageUrl))
+            {
+                // Check if it's a base64 data URL (which we don't want to store directly)
+                if (input.ProfileImageUrl.StartsWith("data:image/"))
+                {
+                    throw new Exception("Base64 image data is not supported. Please upload the image file first and provide the URL.");
+                }
+                
+                // Only store if it's a valid URL (starts with http/https or is a relative path)
+                if (input.ProfileImageUrl.StartsWith("http://") || 
+                    input.ProfileImageUrl.StartsWith("https://") || 
+                    input.ProfileImageUrl.StartsWith("/"))
+                {
+                    appUser.ProfileImageUrl = input.ProfileImageUrl;
+                }
+                else
+                {
+                    throw new Exception("Invalid image URL format. Please provide a valid URL.");
+                }
+            }
+            else
+            {
+                appUser.ProfileImageUrl = string.Empty;
+            }
+
+            // Persist admin approval flag if provided
+            if (input.IsAdminApproved.HasValue)
+            {
+                appUser.IsAdminApproved = input.IsAdminApproved.Value;
+            }
+
+            // Persist review reason if provided
+            if (!string.IsNullOrEmpty(input.ReviewReason))
+            {
+                appUser.ReviewReason = input.ReviewReason;
+            }
+
+            // Persist review status if provided
+            if (!string.IsNullOrEmpty(input.ReviewStatus))
+            {
+                if (Enum.TryParse<DeliveryApp.Domain.Enums.ReviewStatus>(input.ReviewStatus, true, out var reviewStatus))
+                {
+                    appUser.ReviewStatus = reviewStatus;
+                }
+            }
+
+            // Persist activation flag if provided
+            if (input.IsActive.HasValue)
+            {
+                identityUser.SetIsActive(input.IsActive.Value);
+            }
+
+            // Update IdentityUser phone number if provided
             if (!string.IsNullOrEmpty(input.PhoneNumber))
-                await _userManager.SetPhoneNumberAsync(identityUser, input.PhoneNumber);
+            {
+                var phoneResult = await _userManager.SetPhoneNumberAsync(identityUser, input.PhoneNumber);
+                if (!phoneResult.Succeeded)
+                {
+                    throw new Exception($"Failed to update phone number: {string.Join("; ", phoneResult.Errors.Select(e => e.Description))}");
+                }
+            }
 
+            // Persist confirmation flags if provided
+            if (input.EmailConfirmed.HasValue)
+            {
+                identityUser.SetEmailConfirmed(input.EmailConfirmed.Value);
+            }
+
+            if (input.PhoneNumberConfirmed.HasValue)
+            {
+                identityUser.SetPhoneNumberConfirmed(input.PhoneNumberConfirmed.Value);
+            }
+
+            // Update IdentityUser first
             var identityResult = await _userManager.UpdateAsync(identityUser);
             if (!identityResult.Succeeded)
             {
-                throw new Exception(string.Join("; ", identityResult.Errors.Select(e => e.Description)));
+                throw new Exception($"Failed to update identity user: {string.Join("; ", identityResult.Errors.Select(e => e.Description))}");
             }
+
+            // Update AppUser properties and save
+            await _userRepository.UpdateAsync(appUser, autoSave: true);
 
             // Update roles if provided
             if (!string.IsNullOrEmpty(input.Role))
             {
-                var currentRoles = (await _userManager.GetRolesAsync(identityUser)).ToList();
-                if (!currentRoles.Contains(input.Role) || currentRoles.Count > 1)
+                // Clean up role value to prevent duplication
+                var cleanRole = input.Role;
+                if (cleanRole.Contains("restaurantrestaurant_owner"))
                 {
-                    await _userManager.RemoveFromRolesAsync(identityUser, currentRoles);
-                    await _userManager.AddToRoleAsync(identityUser, input.Role);
+                    cleanRole = "restaurant_owner";
+                }
+                else if (cleanRole.Contains("restaurant"))
+                {
+                    cleanRole = System.Text.RegularExpressions.Regex.Replace(cleanRole, @"restaurant+", "restaurant");
+                    cleanRole = System.Text.RegularExpressions.Regex.Replace(cleanRole, @"_+", "_");
+                }
+
+                var currentRoles = (await _userManager.GetRolesAsync(identityUser)).ToList();
+                
+                // Only update roles if the new role is different or user has multiple roles
+                if (!currentRoles.Contains(cleanRole) || currentRoles.Count > 1)
+                {
+                    var removeResult = await _userManager.RemoveFromRolesAsync(identityUser, currentRoles);
+                    if (!removeResult.Succeeded)
+                    {
+                        throw new Exception($"Failed to remove roles: {string.Join("; ", removeResult.Errors.Select(e => e.Description))}");
+                    }
+
+                    var addResult = await _userManager.AddToRoleAsync(identityUser, cleanRole);
+                    if (!addResult.Succeeded)
+                    {
+                        throw new Exception($"Failed to add role: {string.Join("; ", addResult.Errors.Select(e => e.Description))}");
+                    }
                 }
             }
 
+            // Get updated roles
             var roles = (await _userManager.GetRolesAsync(identityUser)).ToList();
+            
             return new UserDto
             {
                 Id = appUser.Id,
@@ -564,7 +697,10 @@ namespace DeliveryApp.Application.Services
                 ReviewStatus = appUser.ReviewStatus.ToString(),
                 ReviewReason = appUser.ReviewReason,
                 CreationTime = appUser.CreationTime,
-                UserType = roles.FirstOrDefault()
+                UserType = roles.FirstOrDefault(),
+                EmailConfirmed = identityUser.EmailConfirmed,
+                PhoneNumberConfirmed = identityUser.PhoneNumberConfirmed,
+                IsAdminApproved = appUser.IsAdminApproved
             };
         }
 
@@ -882,7 +1018,7 @@ namespace DeliveryApp.Application.Services
                 LastLoginTime = null, // LastLoginTime is not available in IdentityUser
                 EmailConfirmed = identityUser.EmailConfirmed,
                 PhoneNumberConfirmed = identityUser.PhoneNumberConfirmed,
-               
+                IsAdminApproved = appUser.IsAdminApproved
             };
         }
 
@@ -923,7 +1059,7 @@ namespace DeliveryApp.Application.Services
                 LastLoginTime = null, // LastLoginTime is not available in IdentityUser
                 EmailConfirmed = identityUser.EmailConfirmed,
                 PhoneNumberConfirmed = identityUser.PhoneNumberConfirmed,
-             
+                IsAdminApproved = appUser.IsAdminApproved
             };
         }
 

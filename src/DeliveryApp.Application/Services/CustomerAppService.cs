@@ -88,7 +88,31 @@ namespace DeliveryApp.Application.Services
             
             user.Name = input.Name;
             user.SetPhoneNumber(input.PhoneNumber, false);
-            user.ProfileImageUrl = input.ProfileImageUrl;
+            
+            if (!string.IsNullOrEmpty(input.ProfileImageUrl))
+            {
+                // Check if it's a base64 data URL (which we don't want to store directly)
+                if (input.ProfileImageUrl.StartsWith("data:image/"))
+                {
+                    throw new Exception("Base64 image data is not supported. Please upload the image file first and provide the URL.");
+                }
+                
+                // Only store if it's a valid URL (starts with http/https or is a relative path)
+                if (input.ProfileImageUrl.StartsWith("http://") || 
+                    input.ProfileImageUrl.StartsWith("https://") || 
+                    input.ProfileImageUrl.StartsWith("/"))
+                {
+                    user.ProfileImageUrl = input.ProfileImageUrl;
+                }
+                else
+                {
+                    throw new Exception("Invalid image URL format. Please provide a valid URL.");
+                }
+            }
+            else
+            {
+                user.ProfileImageUrl = string.Empty;
+            }
             
             await _userRepository.UpdateAsync(user);
             

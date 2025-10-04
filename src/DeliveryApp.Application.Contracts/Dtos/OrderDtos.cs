@@ -30,6 +30,8 @@ namespace DeliveryApp.Application.Contracts.Dtos
         
         public OrderStatus Status { get; set; }
         
+        public PaymentStatus PaymentStatus { get; set; }
+        
         public Guid DeliveryAddressId { get; set; }
         public AddressDto DeliveryAddress { get; set; }
         
