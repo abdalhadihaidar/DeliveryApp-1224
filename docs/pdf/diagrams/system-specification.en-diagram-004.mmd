@@ -1,0 +1,57 @@
+sequenceDiagram
+  participant C as Customer
+  participant API as HTTP API
+  participant OS as Order Service
+  participant PS as Stripe Payment Service
+  participant ST as Stripe
+  participant DB as Database
+  C->>API: Create order
+  API->>OS: Persist order (Pending Payment)
+  OS->>DB: Insert Order
+  C->>API: Pay (amount, method)
+  API->>PS: Create PaymentIntent
+  PS->>ST: Create PaymentIntent
+  ST-->>PS: ClientSecret/Status
+  PS->>DB: Save PaymentTransaction
+  API-->>C: ClientSecret
+  ST-->>API: Webhook (succeeded/failed)
+  API->>PS: HandleWebhook
+  PS->>DB: Update PaymentTransaction/Order Status
+sequenceDiagram
+  participant C as Customer
+  participant API as HTTP API
+  participant OS as Order Service
+  participant PS as Stripe Payment Service
+  participant ST as Stripe
+  participant DB as Database
+  C->>API: Create order
+  API->>OS: Persist order (Pending Payment)
+  OS->>DB: Insert Order
+  C->>API: Pay (amount, method)
+  API->>PS: Create PaymentIntent
+  PS->>ST: Create PaymentIntent
+  ST-->>PS: ClientSecret/Status
+  PS->>DB: Save PaymentTransaction
+  API-->>C: ClientSecret
+  ST-->>API: Webhook (succeeded/failed)
+  API->>PS: HandleWebhook
+  PS->>DB: Update PaymentTransaction/Order Status
+sequenceDiagram
+  participant C as Customer
+  participant API as HTTP API
+  participant OS as Order Service
+  participant PS as Stripe Payment Service
+  participant ST as Stripe
+  participant DB as Database
+  C->>API: Create order
+  API->>OS: Persist order (Pending Payment)
+  OS->>DB: Insert Order
+  C->>API: Pay (amount, method)
+  API->>PS: Create PaymentIntent
+  PS->>ST: Create PaymentIntent
+  ST-->>PS: ClientSecret/Status
+  PS->>DB: Save PaymentTransaction
+  API-->>C: ClientSecret
+  ST-->>API: Webhook (succeeded/failed)
+  API->>PS: HandleWebhook
+  PS->>DB: Update PaymentTransaction/Order Status

@@ -1,0 +1,27 @@
+sequenceDiagram
+  participant C as Customer
+  participant API as HTTP API
+  participant OS as Order Service
+  participant DB as Database
+  C->>API: Create order (COD)
+  API->>OS: Persist order (PaymentStatus=Pending)
+  OS->>DB: Insert Order
+  Note over API,DB: Settlement happens post-delivery via CODTransaction
+sequenceDiagram
+  participant C as Customer
+  participant API as HTTP API
+  participant OS as Order Service
+  participant DB as Database
+  C->>API: Create order (COD)
+  API->>OS: Persist order (PaymentStatus=Pending)
+  OS->>DB: Insert Order
+  Note over API,DB: Settlement happens post-delivery via CODTransaction
+sequenceDiagram
+  participant C as Customer
+  participant API as HTTP API
+  participant OS as Order Service
+  participant DB as Database
+  C->>API: Create order (COD)
+  API->>OS: Persist order (PaymentStatus=Pending)
+  OS->>DB: Insert Order
+  Note over API,DB: Settlement happens post-delivery via CODTransaction

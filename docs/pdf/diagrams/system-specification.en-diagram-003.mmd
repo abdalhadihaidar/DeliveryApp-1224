@@ -1,0 +1,30 @@
+sequenceDiagram
+  participant U as User
+  participant W as Web/API
+  participant O as OpenIddict
+  participant DB as Database
+  U->>W: Register/Login request
+  W->>O: Token/Authorize
+  O->>DB: Validate credentials
+  O-->>W: Access/ID token
+  W-->>U: Authenticated session
+sequenceDiagram
+  participant U as User
+  participant W as Web/API
+  participant O as OpenIddict
+  participant DB as Database
+  U->>W: Register/Login request
+  W->>O: Token/Authorize
+  O->>DB: Validate credentials
+  O-->>W: Access/ID token
+  W-->>U: Authenticated session
+sequenceDiagram
+  participant U as User
+  participant W as Web/API
+  participant O as OpenIddict
+  participant DB as Database
+  U->>W: Register/Login request
+  W->>O: Token/Authorize
+  O->>DB: Validate credentials
+  O-->>W: Access/ID token
+  W-->>U: Authenticated session

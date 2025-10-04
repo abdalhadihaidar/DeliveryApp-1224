@@ -1,0 +1,13 @@
+flowchart LR
+  Client[ويب/بليزر/جوال] -->|HTTPS| WebApp[DeliveryApp.Web]
+  Client -->|HTTPS| ApiHost[DeliveryApp.HttpApi.Host]
+  subgraph طبقة التطبيق
+    AppServices[خدمات التطبيق]
+  end
+  WebApp <-->|وحدات ABP| AppServices
+  ApiHost <-->|وحدات ABP| AppServices
+  AppServices --> Db[(SQL Server)]
+  AppServices --> Stripe[(Stripe API)]
+  AppServices --> SendPulse[(SendPulse API)]
+  AppServices --> Firebase[(Firebase Admin)]
+  Redis[(Redis)] --- AppServices

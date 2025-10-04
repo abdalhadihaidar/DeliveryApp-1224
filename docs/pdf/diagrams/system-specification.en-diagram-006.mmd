@@ -1,0 +1,36 @@
+sequenceDiagram
+  participant RO as Restaurant Owner
+  participant API as HTTP API
+  participant ADS as AdRequest Service
+  participant ADM as Admin
+  participant DB as Database
+  RO->>API: Submit AdRequest
+  API->>ADS: Validate/Save
+  ADS->>DB: Insert AdRequest
+  ADM->>API: Review/Approve
+  API->>ADS: Approve
+  ADS->>DB: Link Advertisement
+sequenceDiagram
+  participant RO as Restaurant Owner
+  participant API as HTTP API
+  participant ADS as AdRequest Service
+  participant ADM as Admin
+  participant DB as Database
+  RO->>API: Submit AdRequest
+  API->>ADS: Validate/Save
+  ADS->>DB: Insert AdRequest
+  ADM->>API: Review/Approve
+  API->>ADS: Approve
+  ADS->>DB: Link Advertisement
+sequenceDiagram
+  participant RO as Restaurant Owner
+  participant API as HTTP API
+  participant ADS as AdRequest Service
+  participant ADM as Admin
+  participant DB as Database
+  RO->>API: Submit AdRequest
+  API->>ADS: Validate/Save
+  ADS->>DB: Insert AdRequest
+  ADM->>API: Review/Approve
+  API->>ADS: Approve
+  ADS->>DB: Link Advertisement
