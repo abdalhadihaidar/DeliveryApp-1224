@@ -113,3 +113,4 @@ try {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "Make sure the backend is running and the auth token is valid." -ForegroundColor Yellow
 }
+
