@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant APP as خدمة التطبيق
+  participant SP as SendPulse
+  participant FB as Firebase
+  participant DB as قاعدة البيانات
+  APP->>SP: إرسال بريد (رمز وصول)
+  APP->>FB: إرسال إشعار فوري
+  APP->>DB: تتبّع الحالة

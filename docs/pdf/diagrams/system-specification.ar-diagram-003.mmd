@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant U as مستخدم
+  participant W as ويب/واجهة برمجية
+  participant O as OpenIddict
+  participant DB as قاعدة البيانات
+  U->>W: طلب تسجيل/تسجيل دخول
+  W->>O: تفويض/رمز وصول
+  O->>DB: التحقق من الاعتمادات
+  O-->>W: رموز الوصول/الهوية
+  W-->>U: جلسة مصادقة

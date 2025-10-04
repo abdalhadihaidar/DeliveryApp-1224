@@ -1,0 +1,39 @@
+flowchart LR
+  Client[Web/Blazor/Mobile] -->|HTTPS| WebApp[DeliveryApp.Web]
+  Client -->|HTTPS| ApiHost[DeliveryApp.HttpApi.Host]
+  subgraph Application Layer
+    AppServices[Application Services]
+  end
+  WebApp <-->|ABP Modules| AppServices
+  ApiHost <-->|ABP Modules| AppServices
+  AppServices --> Db[(SQL Server)]
+  AppServices --> Stripe[(Stripe API)]
+  AppServices --> SendPulse[(SendPulse API)]
+  AppServices --> Firebase[(Firebase Admin)]
+  Redis[(Redis)] --- AppServices
+flowchart LR
+  Client[Web/Blazor/Mobile] -->|HTTPS| WebApp[DeliveryApp.Web]
+  Client -->|HTTPS| ApiHost[DeliveryApp.HttpApi.Host]
+  subgraph Application Layer
+    AppServices[Application Services]
+  end
+  WebApp <-->|ABP Modules| AppServices
+  ApiHost <-->|ABP Modules| AppServices
+  AppServices --> Db[(SQL Server)]
+  AppServices --> Stripe[(Stripe API)]
+  AppServices --> SendPulse[(SendPulse API)]
+  AppServices --> Firebase[(Firebase Admin)]
+  Redis[(Redis)] --- AppServices
+flowchart LR
+  Client[Web/Blazor/Mobile] -->|HTTPS| WebApp[DeliveryApp.Web]
+  Client -->|HTTPS| ApiHost[DeliveryApp.HttpApi.Host]
+  subgraph Application Layer
+    AppServices[Application Services]
+  end
+  WebApp <-->|ABP Modules| AppServices
+  ApiHost <-->|ABP Modules| AppServices
+  AppServices --> Db[(SQL Server)]
+  AppServices --> Stripe[(Stripe API)]
+  AppServices --> SendPulse[(SendPulse API)]
+  AppServices --> Firebase[(Firebase Admin)]
+  Redis[(Redis)] --- AppServices

@@ -1,0 +1,11 @@
+{
+  "name": "deliveryapp-docs",
+  "private": true,
+  "scripts": {
+    "build": "bash ./compile-pdf.sh"
+  },
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "^10.9.1",
+    "md-to-pdf": "^5.2.4"
+  }
+}

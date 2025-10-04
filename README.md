@@ -67,3 +67,20 @@ You can see the following resources to learn more about your solution and the AB
 * [Web Application Development Tutorial](https://abp.io/docs/latest/tutorials/book-store/part-01?UI=Blazor&DB=EF)
 * [Application Startup Template Structure](https://abp.io/docs/latest/solution-templates/layered-web-application)
 * [LeptonX Lite MVC UI](https://abp.io/docs/latest/ui-themes/lepton-x-lite/asp-net-core)
+
+### Project Documentation
+
+For comprehensive documentation (English and Arabic), see the docs folder:
+
+English:
+- Developer Guide: docs/developer-guide.md
+- Investor Overview: docs/investor-overview.md
+- System Specification (with diagrams): docs/system-specification.en.md
+
+العربية:
+- دليل المطوّر: docs/developer-guide.ar.md
+- نظرة عامة للمستثمر: docs/investor-overview.ar.md
+- المواصفات النظامية (مع مخططات): docs/system-specification.ar.md
+
+Other:
+- Existing Guides Index: docs/guides-index.md
