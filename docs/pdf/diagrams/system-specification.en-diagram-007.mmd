@@ -1,0 +1,24 @@
+sequenceDiagram
+  participant APP as App Service
+  participant SP as SendPulse
+  participant FB as Firebase
+  participant DB as Database
+  APP->>SP: Send email (token->access)
+  APP->>FB: Send push message
+  APP->>DB: Track notification status
+sequenceDiagram
+  participant APP as App Service
+  participant SP as SendPulse
+  participant FB as Firebase
+  participant DB as Database
+  APP->>SP: Send email (token->access)
+  APP->>FB: Send push message
+  APP->>DB: Track notification status
+sequenceDiagram
+  participant APP as App Service
+  participant SP as SendPulse
+  participant FB as Firebase
+  participant DB as Database
+  APP->>SP: Send email (token->access)
+  APP->>FB: Send push message
+  APP->>DB: Track notification status

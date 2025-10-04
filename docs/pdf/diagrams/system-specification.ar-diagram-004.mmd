@@ -1,0 +1,19 @@
+sequenceDiagram
+  participant C as عميل
+  participant API as API
+  participant OS as خدمة الطلب
+  participant PS as خدمة الدفع Stripe
+  participant ST as Stripe
+  participant DB as قاعدة البيانات
+  C->>API: إنشاء طلب
+  API->>OS: حفظ الطلب (Pending Payment)
+  OS->>DB: إدراج الطلب
+  C->>API: الدفع (المبلغ/الطريقة)
+  API->>PS: إنشاء PaymentIntent
+  PS->>ST: إنشاء PaymentIntent
+  ST-->>PS: ClientSecret/Status
+  PS->>DB: حفظ PaymentTransaction
+  API-->>C: ClientSecret
+  ST-->>API: Webhook (succeeded/failed)
+  API->>PS: HandleWebhook
+  PS->>DB: تحديث حالة الدفع/الطلب

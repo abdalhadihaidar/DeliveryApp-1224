@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as عميل
+  participant API as API
+  participant OS as خدمة الطلب
+  participant DB as قاعدة البيانات
+  C->>API: إنشاء طلب (COD)
+  API->>OS: حفظ الطلب (PaymentStatus=Pending)
+  OS->>DB: إدراج الطلب
+  Note over API,DB: التسوية لاحقاً عبر كيان CODTransaction

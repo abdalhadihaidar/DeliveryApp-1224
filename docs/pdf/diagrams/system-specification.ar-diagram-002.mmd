@@ -1,0 +1,22 @@
+classDiagram
+  class Restaurant {+Guid Id
+    +string Name
+    +decimal? CommissionRate
+    +Address Address
+    +List~MenuItem~ Menu
+    +Guid? CategoryId}
+  class MealCategory {+Guid Id +string Name +Guid RestaurantId}
+  class Order {+Guid Id +Guid UserId +Guid RestaurantId
+    +List~OrderItem~ Items +string Status +string PaymentStatus}
+  class PaymentTransaction {+int Id +Guid OrderId +string PaymentIntentId +decimal Amount +string Status}
+  class Advertisement {+Guid Id +Guid? RestaurantId +Guid? CreatedById}
+  class AdRequest {+Guid Id +Guid RestaurantId +Guid? ReviewedById +Guid? AdvertisementId}
+  class ChatSession {+Guid Id +string DeliveryId +string CustomerId +bool IsActive}
+  class ChatMessage {+Guid Id +Guid SessionId +string SenderId +string Content}
+
+  Restaurant --> MealCategory
+  Restaurant --> Order
+  Order --> OrderItem
+  Order --> PaymentTransaction
+  AdRequest --> Advertisement
+  ChatSession --> ChatMessage

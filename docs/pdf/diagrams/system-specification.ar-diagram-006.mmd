@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant RO as مالك مطعم
+  participant API as API
+  participant ADS as خدمة AdRequest
+  participant ADM as مشرف
+  participant DB as قاعدة البيانات
+  RO->>API: تقديم AdRequest
+  API->>ADS: تحقق/حفظ
+  ADS->>DB: إدراج AdRequest
+  ADM->>API: مراجعة/موافقة
+  API->>ADS: موافقة
+  ADS->>DB: ربط Advertisement

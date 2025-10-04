@@ -1,0 +1,11 @@
+@page { size: A4; margin: 18mm; }
+body { font-family: Arial, Helvetica, sans-serif; }
+h1, h2, h3 { page-break-after: avoid; }
+pre, code { font-family: Consolas, 'Courier New', monospace; }
+img, svg { max-width: 100%; }
+
+/* Arabic RTL */
+html[dir="rtl"] body, body.rtl { direction: rtl; font-family: 'Amiri', 'Noto Kufi Arabic', Tahoma, Arial, sans-serif; }
+
+/* Improve Mermaid SVG printing */
+.mermaid { page-break-inside: avoid; }
