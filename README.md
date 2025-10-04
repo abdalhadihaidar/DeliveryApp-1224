@@ -70,8 +70,17 @@ You can see the following resources to learn more about your solution and the AB
 
 ### Project Documentation
 
-For comprehensive documentation targeting both developers and stakeholders, see the docs folder:
+For comprehensive documentation (English and Arabic), see the docs folder:
 
+English:
 - Developer Guide: docs/developer-guide.md
 - Investor Overview: docs/investor-overview.md
+- System Specification (with diagrams): docs/system-specification.en.md
+
+العربية:
+- دليل المطوّر: docs/developer-guide.ar.md
+- نظرة عامة للمستثمر: docs/investor-overview.ar.md
+- المواصفات النظامية (مع مخططات): docs/system-specification.ar.md
+
+Other:
 - Existing Guides Index: docs/guides-index.md
