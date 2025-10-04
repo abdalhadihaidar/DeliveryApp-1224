@@ -1209,6 +1209,119 @@ namespace DeliveryApp.Domain.Data
                 }
             };
 
+            // Create additional orders for better dashboard data
+            var additionalOrder1Id = _guidGenerator.Create();
+            _orderIds["additionalOrder1"] = additionalOrder1Id;
+            
+            var additionalOrder1 = new Order(additionalOrder1Id)
+            {
+                RestaurantId = _restaurantIds["restaurant1"],
+                UserId = _userIds["customer"],
+                OrderDate = DateTime.Now.AddMinutes(-45),
+                Subtotal = 55.00m,
+                DeliveryFee = 5.00m,
+                Tax = 4.40m,
+                TotalAmount = 64.40m,
+                EstimatedDeliveryTime = 35,
+                Status = OrderStatus.OutForDelivery,
+                DeliveryPersonId = _userIds["delivery"],
+                DeliveryAddressId = _addressIds["home"],
+                PaymentMethodId = _paymentMethodIds["credit"],
+                Items = new List<OrderItem>
+                {
+                    CreateOrderItem(
+                        _menuItemIds["menuItem1"],
+                        "شاورما دجاج كبير",
+                        2,
+                        20.00m,
+                        new List<string> { "حار", "متوسط", "عادي" },
+                        new List<string> { "حار" }
+                    ),
+                    CreateOrderItem(
+                        _menuItemIds["menuItem2"],
+                        "شاورما لحم كبير",
+                        1,
+                        25.00m,
+                        new List<string> { "حار", "متوسط", "عادي" },
+                        new List<string> { "متوسط" }
+                    )
+                }
+            };
+
+            var additionalOrder2Id = _guidGenerator.Create();
+            _orderIds["additionalOrder2"] = additionalOrder2Id;
+            
+            var additionalOrder2 = new Order(additionalOrder2Id)
+            {
+                RestaurantId = _restaurantIds["restaurant2"],
+                UserId = _userIds["customer2"],
+                OrderDate = DateTime.Now.AddMinutes(-20),
+                Subtotal = 42.00m,
+                DeliveryFee = 7.50m,
+                Tax = 3.36m,
+                TotalAmount = 52.86m,
+                EstimatedDeliveryTime = 0,
+                Status = OrderStatus.Preparing,
+                DeliveryAddressId = _addressIds["home2"],
+                PaymentMethodId = _paymentMethodIds["credit2"],
+                Items = new List<OrderItem>
+                {
+                    CreateOrderItem(
+                        _menuItemIds["menuItem4"],
+                        "بيتزا مارغريتا",
+                        1,
+                        30.00m,
+                        new List<string> { "صغير", "وسط", "كبير" },
+                        new List<string> { "وسط" }
+                    ),
+                    CreateOrderItem(
+                        _menuItemIds["menuItem6"],
+                        "بيتزا دجاج",
+                        1,
+                        35.00m,
+                        new List<string> { "صغير", "وسط", "كبير" },
+                        new List<string> { "صغير" }
+                    )
+                }
+            };
+
+            var additionalOrder3Id = _guidGenerator.Create();
+            _orderIds["additionalOrder3"] = additionalOrder3Id;
+            
+            var additionalOrder3 = new Order(additionalOrder3Id)
+            {
+                RestaurantId = _restaurantIds["restaurant3"],
+                UserId = _userIds["customer"],
+                OrderDate = DateTime.Now.AddMinutes(-10),
+                Subtotal = 28.00m,
+                DeliveryFee = 6.00m,
+                Tax = 2.24m,
+                TotalAmount = 36.24m,
+                EstimatedDeliveryTime = 0,
+                Status = OrderStatus.WaitingCourier,
+                DeliveryAddressId = _addressIds["work"],
+                PaymentMethodId = _paymentMethodIds["cash"],
+                Items = new List<OrderItem>
+                {
+                    CreateOrderItem(
+                        _menuItemIds["menuItem7"],
+                        "بقلاوة",
+                        1,
+                        15.00m,
+                        new List<string> { "كيلو", "نصف كيلو", "ربع كيلو" },
+                        new List<string> { "ربع كيلو" }
+                    ),
+                    CreateOrderItem(
+                        _menuItemIds["menuItem8"],
+                        "كنافة",
+                        1,
+                        18.00m,
+                        new List<string> { "كيلو", "نصف كيلو", "ربع كيلو" },
+                        new List<string> { "نصف كيلو" }
+                    )
+                }
+            };
+
             // Save orders to database
             await _orderRepository.InsertAsync(completedOrder);
             await _orderRepository.InsertAsync(inDeliveryOrder);
@@ -1218,6 +1331,9 @@ namespace DeliveryApp.Domain.Data
             await _orderRepository.InsertAsync(olderOrder1);
             await _orderRepository.InsertAsync(olderOrder2);
             await _orderRepository.InsertAsync(customer2Order);
+            await _orderRepository.InsertAsync(additionalOrder1);
+            await _orderRepository.InsertAsync(additionalOrder2);
+            await _orderRepository.InsertAsync(additionalOrder3);
             
             // Update delivery person status with current order
             if (_userIds.ContainsKey("delivery"))

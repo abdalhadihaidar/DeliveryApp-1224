@@ -193,6 +193,7 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = user.Name, // Required field - use existing user name
                 IsActive = true,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true
@@ -221,6 +222,7 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = user.Name, // Required field - use existing user name
                 IsActive = false
             };
 
@@ -246,6 +248,7 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = user.Name, // Required field - use existing user name
                 IsActive = true
             };
 
@@ -270,6 +273,7 @@ namespace DeliveryApp.Web.Controllers
             var updateInput = new UpdateUserDto
             {
                 UserId = id,
+                Name = user.Name, // Required field - use existing user name
                 IsActive = false
             };
 

@@ -10,6 +10,7 @@ using DeliveryApp.Domain.Enums;
 using DeliveryApp.Services;
 using DeliveryApp.Application.Contracts.Dtos;
 using DeliveryApp.Application.Contracts.Services;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DeliveryApp.Application.Services
@@ -203,43 +204,51 @@ namespace DeliveryApp.Application.Services
         // Admin methods
         public async Task<PagedResultDto<OrderDto>> GetListAsync(GetOrderListDto input)
         {
-            // Get all orders and filter in application layer
-            var allOrders = await _orderRepository.GetListAsync();
+            var queryable = await _orderRepository.GetQueryableAsync();
+            
+            // Include all related entities
+            var query = queryable
+                .Include(o => o.User)
+                .Include(o => o.Restaurant)
+                .Include(o => o.DeliveryPerson)
+                .Include(o => o.DeliveryAddress)
+                .Include(o => o.PaymentMethod)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.MenuItem)
+                .AsQueryable();
             
             // Apply filters
-            var filteredOrders = allOrders.AsQueryable();
-            
             if (!string.IsNullOrEmpty(input.Status) && Enum.TryParse<OrderStatus>(input.Status, true, out var status))
             {
-                filteredOrders = filteredOrders.Where(o => o.Status == status);
+                query = query.Where(o => o.Status == status);
             }
             
             if (!string.IsNullOrEmpty(input.RestaurantName))
             {
-                // Note: This would require joining with restaurant data in a real implementation
-                // For now, we'll skip this filter or implement it differently
+                query = query.Where(o => o.Restaurant.Name.Contains(input.RestaurantName));
             }
             
             if (!string.IsNullOrEmpty(input.CustomerName))
             {
-                // Note: This would require joining with user data in a real implementation
-                // For now, we'll skip this filter or implement it differently
+                query = query.Where(o => o.User.Name.Contains(input.CustomerName));
             }
             
             if (input.DateFrom.HasValue)
             {
-                filteredOrders = filteredOrders.Where(o => o.CreationTime >= input.DateFrom.Value);
+                query = query.Where(o => o.CreationTime >= input.DateFrom.Value);
             }
             
             if (input.DateTo.HasValue)
             {
-                filteredOrders = filteredOrders.Where(o => o.CreationTime <= input.DateTo.Value);
+                query = query.Where(o => o.CreationTime <= input.DateTo.Value);
             }
             
             if (!string.IsNullOrEmpty(input.SearchTerm))
             {
-                // Note: This would require searching across multiple fields in a real implementation
-                // For now, we'll skip this filter
+                query = query.Where(o => 
+                    o.User.Name.Contains(input.SearchTerm) ||
+                    o.Restaurant.Name.Contains(input.SearchTerm) ||
+                    o.Id.ToString().Contains(input.SearchTerm));
             }
             
             // Apply sorting
@@ -247,18 +256,58 @@ namespace DeliveryApp.Application.Services
             {
                 if (input.Sorting.Contains("CreationTime desc"))
                 {
-                    filteredOrders = filteredOrders.OrderByDescending(o => o.CreationTime);
+                    query = query.OrderByDescending(o => o.CreationTime);
                 }
                 else if (input.Sorting.Contains("CreationTime asc"))
                 {
-                    filteredOrders = filteredOrders.OrderBy(o => o.CreationTime);
+                    query = query.OrderBy(o => o.CreationTime);
+                }
+                else if (input.Sorting.Contains("OrderDate desc"))
+                {
+                    query = query.OrderByDescending(o => o.OrderDate);
+                }
+                else if (input.Sorting.Contains("OrderDate asc"))
+                {
+                    query = query.OrderBy(o => o.OrderDate);
+                }
+                else
+                {
+                    query = query.OrderByDescending(o => o.CreationTime);
                 }
             }
+            else
+            {
+                query = query.OrderByDescending(o => o.CreationTime);
+            }
             
-            var totalCount = filteredOrders.Count();
-            var orders = filteredOrders.Skip(input.SkipCount).Take(input.MaxResultCount).ToList();
+            var totalCount = await query.CountAsync();
+            var orders = await query
+                .Skip(input.SkipCount)
+                .Take(input.MaxResultCount)
+                .ToListAsync();
             
-            var orderDtos = ObjectMapper.Map<List<Domain.Entities.Order>, List<OrderDto>>(orders);
+            var orderDtos = orders.Select(o => new OrderDto
+            {
+                Id = o.Id,
+                UserId = o.UserId,
+                CustomerName = o.User?.Name ?? "Unknown Customer",
+                RestaurantId = o.RestaurantId,
+                RestaurantName = o.Restaurant?.Name ?? "Unknown Restaurant",
+                DeliveryPersonId = o.DeliveryPersonId,
+                DeliveryPersonName = o.DeliveryPerson?.Name ?? null,
+                Items = ObjectMapper.Map<List<OrderItem>, List<OrderItemDto>>(o.Items?.ToList() ?? new List<OrderItem>()),
+                Subtotal = o.Subtotal,
+                DeliveryFee = o.DeliveryFee,
+                Tax = o.Tax,
+                TotalAmount = o.TotalAmount,
+                Status = o.Status,
+                DeliveryAddressId = o.DeliveryAddressId,
+                DeliveryAddress = o.DeliveryAddress != null ? ObjectMapper.Map<Address, AddressDto>(o.DeliveryAddress) : null,
+                PaymentMethodId = o.PaymentMethodId,
+                PaymentMethod = o.PaymentMethod != null ? ObjectMapper.Map<PaymentMethod, PaymentMethodDto>(o.PaymentMethod) : null,
+                OrderDate = o.OrderDate,
+                EstimatedDeliveryTime = o.EstimatedDeliveryTime
+            }).ToList();
             
             return new PagedResultDto<OrderDto>(totalCount, orderDtos);
         }

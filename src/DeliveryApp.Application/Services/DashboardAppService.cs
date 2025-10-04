@@ -201,6 +201,7 @@ namespace DeliveryApp.Application.Services
                 .Include(o => o.User)
                 .Include(o => o.Restaurant)
                 .Include(o => o.DeliveryAddress)
+                .Include(o => o.DeliveryPerson)
                 .Where(o => o.Status == OrderStatus.Delivering || 
                            o.Status == OrderStatus.Preparing || 
                            o.Status == OrderStatus.ReadyForDelivery ||
@@ -245,7 +246,11 @@ namespace DeliveryApp.Application.Services
                 Amount = o.TotalAmount,
                 DeliveryTimeDifference = CalculateDeliveryTimeDifference(o.OrderDate, o.EstimatedDeliveryTime),
                 CustomerStatus = statusLookup.GetValueOrDefault(o.UserId, "Unknown"),
-                OrderStatus = o.Status
+                OrderStatus = o.Status.ToString(),
+                EstimatedDeliveryTime = o.EstimatedDeliveryTime,
+                DeliveryPersonId = o.DeliveryPersonId?.ToString(),
+                DeliveryPersonName = o.DeliveryPerson?.Name ?? null,
+                ActualDeliveryTime = o.Status == OrderStatus.Delivered ? CalculateActualDeliveryTime(o).ToString() : null
             }).ToList();
 
             return new PagedResultDto<CurrentDeliveryDto> 
