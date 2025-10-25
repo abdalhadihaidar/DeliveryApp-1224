@@ -106,6 +106,12 @@ public class DeliveryAppDbContext :
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
 
+        // Fix for EF Core 9.0 CTE syntax issues
+        builder.Entity<IdentityUserRole>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.RoleId });
+        });
+
         /* Configure your own tables/entities inside here */
 
         // Configure ExtraPropertyDictionary to fix migration issues

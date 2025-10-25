@@ -10,6 +10,7 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using AbpIdentityUser = Volo.Abp.Identity.IdentityUser;
+using AbpIdentityRole = Volo.Abp.Identity.IdentityRole;
 
 namespace DeliveryApp.Domain.Data
 {
@@ -22,23 +23,29 @@ namespace DeliveryApp.Domain.Data
     {
         private readonly IGuidGenerator _guidGenerator;
         private readonly IdentityUserManager _userManager;
+        private readonly IdentityRoleManager _roleManager;
         private readonly IRepository<AppUser, Guid> _userRepository;
         private readonly IRepository<Restaurant, Guid> _restaurantRepository;
 
         public AdditionalRestaurantOwnersSeeder(
             IGuidGenerator guidGenerator,
             IdentityUserManager userManager,
+            IdentityRoleManager roleManager,
             IRepository<AppUser, Guid> userRepository,
             IRepository<Restaurant, Guid> restaurantRepository)
         {
             _guidGenerator = guidGenerator;
             _userManager = userManager;
+            _roleManager = roleManager;
             _userRepository = userRepository;
             _restaurantRepository = restaurantRepository;
         }
 
         public async Task SeedAsync(DataSeedContext context)
         {
+            // Ensure the restaurant_owner role exists
+            await EnsureRoleExistsAsync("restaurant_owner");
+
             // Define friendly restaurant-owner seed data
             var owners = new List<(string Email,string Name,string Phone,string Restaurant)>
             {
@@ -102,6 +109,19 @@ namespace DeliveryApp.Domain.Data
                     };
 
                     await _restaurantRepository.InsertAsync(restaurant);
+                }
+            }
+        }
+
+        private async Task EnsureRoleExistsAsync(string roleName)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                var role = new AbpIdentityRole(_guidGenerator.Create(), roleName, null);
+                var result = await _roleManager.CreateAsync(role);
+                if (!result.Succeeded)
+                {
+                    throw new Exception($"Failed to create role {roleName}: {string.Join(";", result.Errors.Select(e => e.Description))}");
                 }
             }
         }

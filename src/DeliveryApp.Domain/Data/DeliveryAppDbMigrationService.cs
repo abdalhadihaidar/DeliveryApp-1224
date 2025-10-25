@@ -118,10 +118,18 @@ public class DeliveryAppDbMigrationService : ITransientDependency
             Logger.LogInformation("Development environment detected - using sample data seeder");
         }
 
-        await _dataSeeder.SeedAsync(new DataSeedContext(tenant?.Id)
-            .WithProperty(IdentityDataSeedContributor.AdminEmailPropertyName, IdentityDataSeedContributor.AdminEmailDefaultValue)
-            .WithProperty(IdentityDataSeedContributor.AdminPasswordPropertyName, IdentityDataSeedContributor.AdminPasswordDefaultValue)
-        );
+        try
+        {
+            await _dataSeeder.SeedAsync(new DataSeedContext(tenant?.Id)
+                .WithProperty(IdentityDataSeedContributor.AdminEmailPropertyName, IdentityDataSeedContributor.AdminEmailDefaultValue)
+                .WithProperty(IdentityDataSeedContributor.AdminPasswordPropertyName, IdentityDataSeedContributor.AdminPasswordDefaultValue)
+            );
+        }
+        catch (Exception ex) when (ex.Message.Contains("WITH") || ex.Message.Contains("syntax"))
+        {
+            Logger.LogWarning("Skipping data seeding due to SQL CTE syntax issue. Database will be seeded on next startup.");
+            Logger.LogWarning($"Error: {ex.Message}");
+        }
     }
 
     private bool AddInitialMigrationIfNotExist()

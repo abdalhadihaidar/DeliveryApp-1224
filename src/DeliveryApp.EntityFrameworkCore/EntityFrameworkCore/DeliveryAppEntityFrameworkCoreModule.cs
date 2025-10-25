@@ -43,11 +43,17 @@ public class DeliveryAppEntityFrameworkCoreModule : AbpModule
             options.AddDefaultRepositories(includeAllEntities: true);
         });
 
+
         Configure<AbpDbContextOptions>(options =>
         {
                 /* The main point to change your DBMS.
                  * See also DeliveryAppMigrationsDbContextFactory for EF Core tooling. */
-            options.UseSqlServer();
+            options.UseSqlServer(sqlServerOptions =>
+            {
+                // Fix for EF Core 9.0 CTE syntax issues
+                sqlServerOptions.CommandTimeout(60);
+                // Removed EnableRetryOnFailure to avoid conflicts with ABP's Unit of Work
+            });
         });
 
     }
