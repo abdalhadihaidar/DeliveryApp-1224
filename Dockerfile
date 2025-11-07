@@ -16,8 +16,14 @@ COPY ["src/DeliveryApp.EntityFrameworkCore/DeliveryApp.EntityFrameworkCore.cspro
 COPY ["src/DeliveryApp.HttpApi/DeliveryApp.HttpApi.csproj", "src/DeliveryApp.HttpApi/"]
 COPY ["src/DeliveryApp.Web/DeliveryApp.Web.csproj", "src/DeliveryApp.Web/"]
 
-# Restore packages
-RUN dotnet restore "DeliveryApp.sln"
+# Restore packages for each project in dependency order
+RUN dotnet restore "src/DeliveryApp.Domain.Shared/DeliveryApp.Domain.Shared.csproj" && \
+    dotnet restore "src/DeliveryApp.Domain/DeliveryApp.Domain.csproj" && \
+    dotnet restore "src/DeliveryApp.Application.Contracts/DeliveryApp.Application.Contracts.csproj" && \
+    dotnet restore "src/DeliveryApp.Application/DeliveryApp.Application.csproj" && \
+    dotnet restore "src/DeliveryApp.EntityFrameworkCore/DeliveryApp.EntityFrameworkCore.csproj" && \
+    dotnet restore "src/DeliveryApp.HttpApi/DeliveryApp.HttpApi.csproj" && \
+    dotnet restore "src/DeliveryApp.Web/DeliveryApp.Web.csproj"
 
 # Copy all source files
 COPY src/ src/
