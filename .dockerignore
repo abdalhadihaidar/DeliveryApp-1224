@@ -1,0 +1,86 @@
+# Build outputs
+**/bin/
+**/obj/
+**/publish-output/
+**/publish/
+
+# Visual Studio files
+**/.vs/
+**/.vscode/
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+
+# Logs
+**/Logs/
+**/*.log
+**/logs.txt
+
+# NuGet packages
+**/packages/
+**/*.nupkg
+
+# Node modules
+**/node_modules/
+**/package-lock.json
+**/yarn.lock
+
+# Test files
+**/test/
+**/*.Tests/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+**/*.md
+**/docs/
+**/documentation/
+
+# Environment files (will be passed as env vars)
+**/env.*
+**/.env*
+
+# Temporary files
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.swp
+**/*.swo
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# IDE files
+**/.idea/
+**/*.iml
+
+# Deployment scripts
+**/*.ps1
+**/*.bat
+**/*.sh
+
+# ZIP files
+**/*.zip
+
+# Database files
+**/*.mdf
+**/*.ldf
+**/*.sqlite
+
+# Certificates (will be mounted or passed as secrets)
+**/*.pfx
+**/*.p12
+**/*.key
+**/*.crt
+
+

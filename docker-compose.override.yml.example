@@ -1,0 +1,23 @@
+# This is an example override file for development
+# Copy this file to docker-compose.override.yml and customize it
+# docker-compose.override.yml is automatically loaded by docker-compose
+
+version: '3.8'
+
+services:
+  web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - App__SelfUrl=http://localhost:5000
+      - OpenIddict__Applications__DeliveryApp_App__RootUrl=http://localhost:4200
+    ports:
+      - "5000:80"
+      - "5001:443"
+
+  sqlserver:
+    environment:
+      - SA_PASSWORD=YourStrong@Password123
+    ports:
+      - "1433:1433"
+
+

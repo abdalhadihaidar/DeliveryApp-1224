@@ -1,0 +1,55 @@
+services:
+  # SQL Server Database
+  - type: pspg
+    name: deliveryapp-db
+    plan: free
+    databaseName: DeliveryApp
+    user: deliveryapp_user
+    # Render will auto-generate password and provide it via DATABASE_URL
+
+  # Web Application
+  - type: web
+    name: deliveryapp-web
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:10000
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: deliveryapp-db
+          property: connectionString
+      - key: App__SelfUrl
+        sync: false
+        generateValue: true
+      - key: OpenIddict__Applications__DeliveryApp_App__ClientId
+        value: DeliveryApp_App
+      - key: OpenIddict__Applications__DeliveryApp_App__ClientSecret
+        value: YXJzdRf2yF8bjY4iIvNc8fn6VQSR5nwGWLZfkvsErfKVEOI5hu6tcyh8uvfjjUmP
+      - key: OpenIddict__Applications__DeliveryApp_App__RootUrl
+        sync: false
+        generateValue: true
+      - key: StringEncryption__DefaultPassPhrase
+        value: YXJzdRf2yF8bjY4iIvNc8fn6VQSR5nwGWLZfkvsErfKVEOI5hu6tcyh8uvfjjUmP
+      - key: JwtSettings__Issuer
+        sync: false
+        generateValue: true
+      - key: JwtSettings__Audience
+        sync: false
+        generateValue: true
+      - key: JwtSettings__SecretKey
+        value: YXJzdRf2yF8bjY4iIvNc8fn6VQSR5nwGWLZfkvsErfKVEOI5hu6tcyh8uvfjjUmP
+      - key: SendPulse__ClientId
+        value: Abdalhadi453@gmail.com
+      - key: SendPulse__ClientSecret
+        value: EcgCtgZcPn
+      - key: SendPulse__FromEmail
+        value: noreply@waselsy.com
+      - key: SendPulse__FromName
+        value: Waseel
+
+

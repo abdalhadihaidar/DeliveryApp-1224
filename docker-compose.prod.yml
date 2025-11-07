@@ -1,0 +1,40 @@
+# Production Docker Compose Configuration
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  sqlserver:
+    # In production, you might want to use an external SQL Server
+    # Comment out this service and update connection string in web service
+    environment:
+      - SA_PASSWORD=${DB_PASSWORD:-YourStrong@Password123}
+    # Uncomment to use external SQL Server:
+    # external: true
+
+  web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=${DB_CONNECTION_STRING}
+      - App__SelfUrl=${APP_SELF_URL:-https://backend.waselsy.com}
+      - OpenIddict__Applications__DeliveryApp_App__ClientId=${OPENID_CLIENT_ID:-DeliveryApp_App}
+      - OpenIddict__Applications__DeliveryApp_App__ClientSecret=${OPENID_CLIENT_SECRET}
+      - OpenIddict__Applications__DeliveryApp_App__RootUrl=${FRONTEND_URL:-https://dashboard.waselsy.com}
+      - StringEncryption__DefaultPassPhrase=${STRING_ENCRYPTION_PASSPHRASE}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - SendPulse__ClientId=${SENDPULSE_CLIENT_ID}
+      - SendPulse__ClientSecret=${SENDPULSE_CLIENT_SECRET}
+      - SendPulse__FromEmail=${SENDPULSE_FROM_EMAIL:-noreply@waselsy.com}
+      - SendPulse__FromName=${SENDPULSE_FROM_NAME:-Waseel}
+    restart: always
+    # Uncomment for production logging
+    # logging:
+    #   driver: "json-file"
+    #   options:
+    #     max-size: "10m"
+    #     max-file: "3"
+
+
