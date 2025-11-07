@@ -261,8 +261,6 @@ src/DeliveryApp.DbMigrator/Logs/*
 src/DeliveryApp.Blazor.Server/Logs/*
 src/DeliveryApp.Blazor.Server.Tiered/Logs/*
 
-# Use abp install-libs to restore.
-**/wwwroot/libs/*
 
 # Environment files
 .env

@@ -30,8 +30,16 @@ COPY src/ src/
 WORKDIR "/src/src/DeliveryApp.Web"
 
 # Ensure wwwroot/libs exists (ABP Framework requirement)
-# If libs folder doesn't exist, create an empty one to prevent errors
-RUN mkdir -p wwwroot/libs || true
+# If wwwroot/libs wasn't copied (because it's in .gitignore), create minimal structure
+RUN if [ ! -d "wwwroot/libs" ] || [ -z "$(find wwwroot/libs -name '*.js' -o -name '*.css' 2>/dev/null | head -1)" ]; then \
+        echo "wwwroot/libs missing or empty, creating minimal structure"; \
+        mkdir -p wwwroot/libs/abp/core; \
+        echo "var abp = abp || {};" > wwwroot/libs/abp/core/abp.js; \
+        echo "/* ABP Framework CSS */" > wwwroot/libs/abp/core/abp.css; \
+        echo "Created minimal wwwroot/libs structure"; \
+    else \
+        echo "wwwroot/libs found with content"; \
+    fi
 
 # Build the project
 RUN dotnet build "DeliveryApp.Web.csproj" -c Release -o /app/build
@@ -57,8 +65,17 @@ RUN mkdir -p /app/Logs && chmod 777 /app/Logs
 # Create wwwroot/uploads directory for file uploads
 RUN mkdir -p /app/wwwroot/uploads/images && chmod 777 /app/wwwroot/uploads/images
 
-# Ensure wwwroot/libs exists (ABP Framework requirement)
-RUN mkdir -p /app/wwwroot/libs || true
+# Ensure wwwroot/libs exists with required ABP files
+# ABP checks for specific files like abp.js and abp.css
+RUN if [ ! -d "/app/wwwroot/libs" ] || [ -z "$(find /app/wwwroot/libs -name '*.js' -o -name '*.css' 2>/dev/null | head -1)" ]; then \
+        echo "wwwroot/libs missing required files, creating minimal ABP structure"; \
+        mkdir -p /app/wwwroot/libs/abp/core; \
+        echo "// ABP Framework placeholder - install libs with: abp install-libs" > /app/wwwroot/libs/abp/core/abp.js; \
+        echo "/* ABP Framework placeholder */" > /app/wwwroot/libs/abp/core/abp.css; \
+        echo "Created minimal wwwroot/libs structure"; \
+    else \
+        echo "wwwroot/libs found with required files"; \
+    fi
 
 # Expose ports
 EXPOSE 80

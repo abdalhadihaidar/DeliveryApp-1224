@@ -32,7 +32,14 @@ COPY src/ src/
 WORKDIR "/src/src/DeliveryApp.Web"
 
 # Ensure wwwroot/libs exists (ABP Framework requirement)
-RUN mkdir -p wwwroot/libs || true
+RUN if [ ! -d "wwwroot/libs" ] || [ -z "$(find wwwroot/libs -name '*.js' -o -name '*.css' 2>/dev/null | head -1)" ]; then \
+        echo "wwwroot/libs missing or empty, creating minimal structure"; \
+        mkdir -p wwwroot/libs/abp/core; \
+        echo "var abp = abp || {};" > wwwroot/libs/abp/core/abp.js; \
+        echo "/* ABP Framework CSS */" > wwwroot/libs/abp/core/abp.css; \
+    else \
+        echo "wwwroot/libs found with content"; \
+    fi
 
 # Build the project
 RUN dotnet build "DeliveryApp.Web.csproj" -c Release -o /app/build
@@ -54,8 +61,13 @@ RUN mkdir -p /app/Logs && chmod 777 /app/Logs
 # Create wwwroot/uploads directory for file uploads
 RUN mkdir -p /app/wwwroot/uploads/images && chmod 777 /app/wwwroot/uploads/images
 
-# Ensure wwwroot/libs exists (ABP Framework requirement)
-RUN mkdir -p /app/wwwroot/libs || true
+# Ensure wwwroot/libs exists with required ABP files
+RUN if [ ! -d "/app/wwwroot/libs" ] || [ -z "$(find /app/wwwroot/libs -name '*.js' -o -name '*.css' 2>/dev/null | head -1)" ]; then \
+        echo "wwwroot/libs missing required files, creating minimal ABP structure"; \
+        mkdir -p /app/wwwroot/libs/abp/core; \
+        echo "// ABP Framework placeholder" > /app/wwwroot/libs/abp/core/abp.js; \
+        echo "/* ABP Framework placeholder */" > /app/wwwroot/libs/abp/core/abp.css; \
+    fi
 
 # Railway automatically sets PORT environment variable
 # Use it if available, otherwise default to 10000

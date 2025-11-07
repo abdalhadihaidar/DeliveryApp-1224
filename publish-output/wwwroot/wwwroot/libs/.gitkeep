@@ -1,0 +1,3 @@
+# This file ensures the libs directory is not empty
+# ABP Framework requires this directory to exist for client-side libraries
+# Since this is an API-only application, we don't need actual client libraries
