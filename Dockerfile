@@ -29,6 +29,10 @@ RUN dotnet restore "src/DeliveryApp.Domain.Shared/DeliveryApp.Domain.Shared.cspr
 COPY src/ src/
 WORKDIR "/src/src/DeliveryApp.Web"
 
+# Ensure wwwroot/libs exists (ABP Framework requirement)
+# If libs folder doesn't exist, create an empty one to prevent errors
+RUN mkdir -p wwwroot/libs || true
+
 # Build the project
 RUN dotnet build "DeliveryApp.Web.csproj" -c Release -o /app/build
 
@@ -52,6 +56,9 @@ RUN mkdir -p /app/Logs && chmod 777 /app/Logs
 
 # Create wwwroot/uploads directory for file uploads
 RUN mkdir -p /app/wwwroot/uploads/images && chmod 777 /app/wwwroot/uploads/images
+
+# Ensure wwwroot/libs exists (ABP Framework requirement)
+RUN mkdir -p /app/wwwroot/libs || true
 
 # Expose ports
 EXPOSE 80

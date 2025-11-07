@@ -35,6 +35,7 @@ using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic.Bundling;
+using Volo.Abp.AspNetCore.Mvc.UI;
 using DeliveryApp.Web.HostedServices;
 using OpenIddict.Server.AspNetCore;
 using Microsoft.AspNetCore.Identity;
@@ -296,6 +297,12 @@ public class DeliveryAppWebModule : AbpModule
         ConfigureSwaggerServices(context.Services);
         ConfigureSignalR(context.Services);
         ConfigureNotifications(context.Services);
+        
+        // Disable ABP libs check for Docker/cloud deployments
+        Configure<AbpMvcLibsOptions>(options =>
+        {
+            options.CheckLibs = false;
+        });
         
         // Disable ABP authorization by registering a custom permission checker that always allows access
         context.Services.AddSingleton<IPermissionChecker, AlwaysAllowPermissionChecker>();
