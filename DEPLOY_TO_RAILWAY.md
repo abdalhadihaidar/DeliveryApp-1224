@@ -29,14 +29,7 @@ git push -u origin main
 4. سجّل دخول بحساب GitHub
 5. اربط المستودع
 
-### 3. إضافة قاعدة البيانات
-
-1. في المشروع، اضغط **"+ New"**
-2. اختر **"Database"** → **"Add PostgreSQL"** (أو **"Add MySQL"**)
-3. Railway سينشئ قاعدة البيانات تلقائياً
-4. انسخ **DATABASE_URL** من Variables
-
-### 4. إضافة Web Service
+### 3. إضافة Web Service (بدون قاعدة بيانات - سنستخدم Somee)
 
 1. في المشروع، اضغط **"+ New"**
 2. اختر **"GitHub Repo"**
@@ -47,7 +40,7 @@ git push -u origin main
 ```
 ASPNETCORE_ENVIRONMENT=Production
 ASPNETCORE_URLS=http://+:${PORT}
-ConnectionStrings__Default=${DATABASE_URL}
+ConnectionStrings__Default=workstation id=waseelsy.mssql.somee.com;packet size=4096;user id=aca_SQLLogin_1;pwd=12345678;data source=waseelsy.mssql.somee.com;persist security info=False;initial catalog=waseelsy;TrustServerCertificate=True
 App__SelfUrl=${RAILWAY_PUBLIC_DOMAIN}
 OpenIddict__Applications__DeliveryApp_App__ClientId=DeliveryApp_App
 OpenIddict__Applications__DeliveryApp_App__ClientSecret=YXJzdRf2yF8bjY4iIvNc8fn6VQSR5nwGWLZfkvsErfKVEOI5hu6tcyh8uvfjjUmP

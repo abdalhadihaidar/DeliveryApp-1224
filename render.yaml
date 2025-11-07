@@ -1,13 +1,5 @@
 services:
-  # SQL Server Database
-  - type: pspg
-    name: deliveryapp-db
-    plan: free
-    databaseName: DeliveryApp
-    user: deliveryapp_user
-    # Render will auto-generate password and provide it via DATABASE_URL
-
-  # Web Application
+  # Web Application (using existing Somee database)
   - type: web
     name: deliveryapp-web
     env: docker
@@ -20,9 +12,7 @@ services:
       - key: ASPNETCORE_URLS
         value: http://+:10000
       - key: ConnectionStrings__Default
-        fromDatabase:
-          name: deliveryapp-db
-          property: connectionString
+        value: workstation id=waseelsy.mssql.somee.com;packet size=4096;user id=aca_SQLLogin_1;pwd=12345678;data source=waseelsy.mssql.somee.com;persist security info=False;initial catalog=waseelsy;TrustServerCertificate=True
       - key: App__SelfUrl
         sync: false
         generateValue: true

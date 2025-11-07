@@ -28,21 +28,7 @@ git push -u origin main
 2. سجّل حساب جديد (يمكن استخدام GitHub)
 3. اربط حساب GitHub
 
-### 3. إنشاء قاعدة بيانات PostgreSQL
-
-**ملاحظة مهمة:** Render لا يوفر SQL Server مجاناً، لكن يوفر PostgreSQL. ستحتاج لتعديل Connection String.
-
-1. في Dashboard، اضغط **"New +"** → **"PostgreSQL"**
-2. اختر:
-   - **Name**: `deliveryapp-db`
-   - **Database**: `DeliveryApp`
-   - **User**: `deliveryapp_user`
-   - **Region**: اختر الأقرب لك
-   - **Plan**: **Free**
-3. اضغط **"Create Database"**
-4. بعد الإنشاء، انسخ **Internal Database URL** (ستحتاجه لاحقاً)
-
-### 4. نشر التطبيق
+### 3. نشر التطبيق (باستخدام قاعدة بيانات Somee الموجودة)
 
 #### الطريقة 1: استخدام render.yaml (موصى به)
 
@@ -60,9 +46,9 @@ git push -u origin main
    ASPNETCORE_ENVIRONMENT=Production
    ASPNETCORE_URLS=http://+:10000
    ```
-6. أضف **Database URL** من الخطوة 3:
+6. أضف **Connection String** لقاعدة بيانات Somee:
    ```
-   ConnectionStrings__Default=<Internal Database URL من PostgreSQL>
+   ConnectionStrings__Default=workstation id=waseelsy.mssql.somee.com;packet size=4096;user id=aca_SQLLogin_1;pwd=12345678;data source=waseelsy.mssql.somee.com;persist security info=False;initial catalog=waseelsy;TrustServerCertificate=True
    ```
 7. اضغط **"Create Web Service"**
 
@@ -81,7 +67,7 @@ git push -u origin main
    ```
    ASPNETCORE_ENVIRONMENT=Production
    ASPNETCORE_URLS=http://+:10000
-   ConnectionStrings__Default=<PostgreSQL Connection String>
+   ConnectionStrings__Default=workstation id=waseelsy.mssql.somee.com;packet size=4096;user id=aca_SQLLogin_1;pwd=12345678;data source=waseelsy.mssql.somee.com;persist security info=False;initial catalog=waseelsy;TrustServerCertificate=True
    App__SelfUrl=https://deliveryapp-web.onrender.com
    OpenIddict__Applications__DeliveryApp_App__ClientId=DeliveryApp_App
    OpenIddict__Applications__DeliveryApp_App__ClientSecret=YXJzdRf2yF8bjY4iIvNc8fn6VQSR5nwGWLZfkvsErfKVEOI5hu6tcyh8uvfjjUmP
