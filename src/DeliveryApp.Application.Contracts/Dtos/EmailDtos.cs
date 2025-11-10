@@ -79,8 +79,22 @@ namespace DeliveryApp.Application.Contracts.Dtos
     /// </summary>
     public class SendPulseSettings
     {
+        // Support both naming conventions for backward compatibility
         public string ApiUserId { get; set; }
         public string ApiSecret { get; set; }
+        
+        // Alternative property names that match appsettings.json
+        public string ClientId 
+        { 
+            get => ApiUserId; 
+            set => ApiUserId = value; 
+        }
+        public string ClientSecret 
+        { 
+            get => ApiSecret; 
+            set => ApiSecret = value; 
+        }
+        
         public string FromEmail { get; set; }
         public string FromName { get; set; }
         public string VerificationTemplateId { get; set; }

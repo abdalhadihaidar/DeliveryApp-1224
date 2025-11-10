@@ -117,14 +117,25 @@ namespace DeliveryApp.Application.Services
                 }
 
                 // Step 6: Send verification email (non-critical, can fail without rolling back)
+                EmailSendResultDto emailResult = null;
                 try
                 {
-                    await _emailService.SendVerificationEmailAsync(new SendVerificationEmailDto
+                    emailResult = await _emailService.SendVerificationEmailAsync(new SendVerificationEmailDto
                     {
                         Email = request.Email,
                         UserName = $"{request.FirstName} {request.LastName}",
                         Language = request.Language
                     });
+
+                    if (emailResult?.Success == true)
+                    {
+                        _logger.LogInformation("Verification email sent successfully to {Email}", request.Email);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to send verification email to {Email}: {Message}", 
+                            request.Email, emailResult?.Message ?? "Unknown error");
+                    }
                 }
                 catch (Exception emailEx)
                 {
@@ -137,7 +148,9 @@ namespace DeliveryApp.Application.Services
                 return new AuthResultDto
                 {
                     Success = true,
-                    Message = "Registration successful. Please verify your email.",
+                    Message = emailResult?.Success == true
+                        ? "Registration successful. Please verify your email."
+                        : "Registration successful. Please check your email for verification code. If you didn't receive it, you can request a resend.",
                     RequiresVerification = true,
                     VerificationType = "Email"
                 };

@@ -139,17 +139,30 @@ namespace DeliveryApp.Application.Services
                 // Send verification email
                 if (_authSettings.RequireEmailVerification)
                 {
-                    await _emailService.SendVerificationEmailAsync(new SendVerificationEmailDto
+                    var emailResult = await _emailService.SendVerificationEmailAsync(new SendVerificationEmailDto
                     {
                         Email = request.Email,
                         UserName = $"{request.FirstName} {request.LastName}",
                         Language = request.Language
                     });
 
+                    if (!emailResult.Success)
+                    {
+                        _logger.LogWarning($"Failed to send verification email to {request.Email}: {emailResult.Message}");
+                        // Still return success but log the warning - user can request resend
+                        // This prevents registration failure if email service is temporarily down
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"Verification email sent successfully to {request.Email}");
+                    }
+
                     return new AuthResultDto
                     {
                         Success = true,
-                        Message = "Registration successful. Please verify your email.",
+                        Message = emailResult.Success 
+                            ? "Registration successful. Please verify your email." 
+                            : "Registration successful. Please check your email for verification code. If you didn't receive it, you can request a resend.",
                         RequiresVerification = true,
                         VerificationType = "Email"
                     };
