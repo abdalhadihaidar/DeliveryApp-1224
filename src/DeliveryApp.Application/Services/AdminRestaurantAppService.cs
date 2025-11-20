@@ -95,12 +95,18 @@ namespace DeliveryApp.Application.Services
         {
             var restaurant = await _restaurantRepository.GetAsync(restaurantId);
             
-            // Update restaurant to approved status using the existing pattern
-            restaurant.Tags.Remove("في انتظار الموافقة");
-            restaurant.Tags.Add("موافق عليه");
+            // Update restaurant to approved status
+            // Create a new list to ensure EF Core detects the change
+            var newTags = restaurant.Tags.ToList();
+            newTags.Remove("في انتظار الموافقة");
+            if (!newTags.Contains("موافق عليه"))
+            {
+                newTags.Add("موافق عليه");
+            }
+            restaurant.Tags = newTags;
             restaurant.IsActive = true;
             
-            await _restaurantRepository.UpdateAsync(restaurant);
+            await _restaurantRepository.UpdateAsync(restaurant, autoSave: true);
             
             return ObjectMapper.Map<Restaurant, RestaurantDto>(restaurant);
         }
@@ -109,13 +115,25 @@ namespace DeliveryApp.Application.Services
         {
             var restaurant = await _restaurantRepository.GetAsync(restaurantId);
             
-            // Update restaurant to rejected status using the existing pattern
-            restaurant.Tags.Remove("في انتظار الموافقة");
-            restaurant.Tags.Add("مرفوض");
-            restaurant.Tags.Add($"سبب الرفض: {reason}");
+            // Update restaurant to rejected status
+            // Create a new list to ensure EF Core detects the change
+            var newTags = restaurant.Tags.ToList();
+            newTags.Remove("في انتظار الموافقة");
+            if (!newTags.Contains("مرفوض"))
+            {
+                newTags.Add("مرفوض");
+            }
+            // Remove any existing rejection reason and add the new one
+            var tagsToRemove = newTags.Where(t => t.StartsWith("سبب الرفض:")).ToList();
+            foreach (var tag in tagsToRemove)
+            {
+                newTags.Remove(tag);
+            }
+            newTags.Add($"سبب الرفض: {reason}");
+            restaurant.Tags = newTags;
             restaurant.IsActive = false;
             
-            await _restaurantRepository.UpdateAsync(restaurant);
+            await _restaurantRepository.UpdateAsync(restaurant, autoSave: true);
             
             return ObjectMapper.Map<Restaurant, RestaurantDto>(restaurant);
         }
