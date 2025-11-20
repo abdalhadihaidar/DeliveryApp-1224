@@ -406,6 +406,16 @@ namespace DeliveryApp.Application.Services
             // Validate restaurant exists
             var restaurant = await _restaurantRepository.GetAsync(input.RestaurantId);
             
+            // Validate minimum order amount
+            if (restaurant.MinimumOrderAmount > 0 && input.Subtotal < restaurant.MinimumOrderAmount)
+            {
+                throw new InvalidOperationException(
+                    $"Minimum order amount is {restaurant.MinimumOrderAmount:C}. " +
+                    $"Current subtotal is {input.Subtotal:C}. " +
+                    $"Please add {restaurant.MinimumOrderAmount - input.Subtotal:C} more to your order."
+                );
+            }
+            
             // Create new order
             var orderId = GuidGenerator.Create();
             var order = new Order(orderId)

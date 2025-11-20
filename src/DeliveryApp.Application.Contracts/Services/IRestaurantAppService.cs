@@ -20,6 +20,7 @@ namespace DeliveryApp.Application.Services
         Task<List<ReviewDto>> GetRestaurantReviewsAsync(Guid restaurantId);
         Task<ReviewDto> AddReviewAsync(Guid restaurantId, CreateReviewDto input);
         Task<List<SpecialOfferDto>> GetRestaurantOffersAsync(Guid restaurantId);
+        Task<List<MenuItemDto>> GetRestaurantMenuItemsAsync(Guid restaurantId);
         
         // Admin methods for restaurant owner management
         Task<List<RestaurantDto>> GetRestaurantsByOwnerAsync(string ownerId);

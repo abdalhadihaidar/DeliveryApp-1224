@@ -165,6 +165,13 @@ namespace DeliveryApp.Application.Services
         }
 
         [AllowAnonymous]
+        public async Task<List<MenuItemDto>> GetRestaurantMenuItemsAsync(Guid restaurantId)
+        {
+            var menuItems = await _menuItemRepository.GetListAsync(m => m.RestaurantId == restaurantId);
+            return ObjectMapper.Map<List<MenuItem>, List<MenuItemDto>>(menuItems);
+        }
+
+        [AllowAnonymous]
         public async Task<List<RestaurantDto>> GetRestaurantsByOwnerAsync(string ownerId)
         {
             var restaurants = await _restaurantRepository.GetListAsync(r => r.OwnerId.ToString() == ownerId);

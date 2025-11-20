@@ -301,7 +301,22 @@ namespace DeliveryApp.Application.Services
 
                 // Get the user
                 var user = await _userManager.FindByIdAsync(tokenInfo.UserId.ToString());
-                if (user == null || !user.IsActive)
+                if (user == null)
+                {
+                    _refreshTokens.TryRemove(request.RefreshToken, out _);
+                    return new MobileAuthResultDto
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        ErrorCode = "USER_NOT_FOUND"
+                    };
+                }
+
+                // Check if user is active - only required for restaurant_owner and delivery roles
+                var roles = await _userManager.GetRolesAsync(user);
+                var requiresActiveCheck = roles.Contains("restaurant_owner") || roles.Contains("delivery");
+                
+                if (requiresActiveCheck && !user.IsActive)
                 {
                     _refreshTokens.TryRemove(request.RefreshToken, out _);
                     return new MobileAuthResultDto

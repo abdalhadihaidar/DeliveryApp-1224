@@ -66,9 +66,13 @@ namespace DeliveryApp.HttpApi.Host.Controllers
         }
 
         [HttpPut("orders/{orderId}/status")]
-        public async Task<OrderDto> UpdateOrderStatus(Guid orderId, [FromBody] OrderStatus status)
+        public async Task<OrderDto> UpdateOrderStatus(Guid orderId, [FromBody] string status)
         {
-            return await _deliveryPersonAppService.UpdateOrderStatusAsync(orderId, status);
+            if (!Enum.TryParse<OrderStatus>(status, true, out var orderStatus))
+            {
+                throw new ArgumentException($"Invalid order status: {status}");
+            }
+            return await _deliveryPersonAppService.UpdateOrderStatusAsync(orderId, orderStatus);
         }
 
         [HttpPost("orders/{orderId}/complete")]

@@ -75,5 +75,11 @@ namespace DeliveryApp.HttpApi.Host.Controllers
         {
             return await _restaurantAppService.GetRestaurantOffersAsync(restaurantId);
         }
+
+        [HttpGet("{restaurantId}/menu")]
+        public async Task<List<MenuItemDto>> GetRestaurantMenu(Guid restaurantId)
+        {
+            return await _restaurantAppService.GetRestaurantMenuItemsAsync(restaurantId);
+        }
     }
 }

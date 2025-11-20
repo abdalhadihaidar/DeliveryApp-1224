@@ -124,6 +124,17 @@ namespace DeliveryApp.Application.Services
             // Calculate totals
             order.Subtotal = order.Items.Sum(i => i.Price * i.Quantity);
             
+            // Validate minimum order amount
+            var restaurant = await _restaurantRepository.GetAsync(input.RestaurantId);
+            if (restaurant.MinimumOrderAmount > 0 && order.Subtotal < restaurant.MinimumOrderAmount)
+            {
+                throw new InvalidOperationException(
+                    $"Minimum order amount is {restaurant.MinimumOrderAmount:C}. " +
+                    $"Current subtotal is {order.Subtotal:C}. " +
+                    $"Please add {restaurant.MinimumOrderAmount - order.Subtotal:C} more to your order."
+                );
+            }
+            
             // Calculate delivery fee using the new dynamic calculation service
             var deliveryFeeRequest = new DeliveryFeeCalculationRequestDto
             {
